@@ -1,56 +1,139 @@
-# Welcome to your Expo app 👋
+# Mistra
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+> **Your life, organized.**
 
-## Get started
+Mistra is a modern **Personal Operating System** designed to help people organize every aspect of their daily lives in one seamless experience. From managing tasks and notes to tracking habits, goals, and schedules, Mistra brings everything together in a clean, intuitive, and beautifully designed mobile application.
 
-1. Install dependencies
+## Features
 
-   ```bash
-   npm install
-   ```
+### Current (Frontend Foundation)
+- Splash Screen
+- Onboarding Flow
+- Welcome Screen
+- Sign In
+- Sign Up
+- Forgot Password
+- Home Dashboard
+- Reusable Design System
+- Shared UI Components
+- Responsive Layouts
+- Mock Data Support
 
-2. Start the app
+### Planned Features
+- ✅ Task Management
+- ✅ Calendar
+- ✅ Notes
+- ✅ Habit Tracking
+- ✅ Goal Tracking
+- ✅ Smart Notifications
+- ✅ AI Planning Assistant
+- ✅ Budget & Expense Tracking
+- ✅ Shopping Lists
+- ✅ Daily Journal
+- ✅ Cloud Sync
+- ✅ Web & Desktop Applications
 
-   ```bash
-   npx expo start
-   ```
+## Design Philosophy
 
-In the output, you'll find options to open the app in a
+Mistra is built around a simple principle:
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+> **One app. One place. Your life, organized.**
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+The interface is designed to be:
+- Clean
+- Modern
+- Minimal
+- Premium
+- User-focused
 
-## Get a fresh project
+## Tech Stack
 
-When you're ready, run:
+- React Native
+- Expo
+- TypeScript
+- Expo Router
+- Zustand
+- TanStack Query
+- React Hook Form
+- Zod
 
-```bash
-npm run reset-project
+## Project Structure
+
+```text
+app/
+components/
+constants/
+features/
+store/
+utils/
+assets/
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Getting Started
 
-### Other setup steps
+### Clone the repository
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+```bash
+git clone https://github.com/MisturaDev/mistra-mobile.git
+```
 
-## Learn more
+### Navigate into the project
 
-To learn more about developing your project with Expo, look at the following resources:
+```bash
+cd mistra-mobile
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+### Install dependencies
 
-## Join the community
+```bash
+npm install
+```
 
-Join our community of developers creating universal apps.
+### Start the development server
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```bash
+npm start
+```
+
+Then:
+
+- Press **a** to run on Android.
+- Press **i** to run on iOS (macOS only).
+- Or scan the QR code with **Expo Go**.
+
+## Roadmap
+
+### Phase 1 — Frontend Foundation
+- [x] Project Setup
+- [x] Design System
+- [x] Authentication UI
+- [x] Home Dashboard
+
+### Phase 2 — Core Features
+- [ ] Tasks
+- [ ] Calendar
+- [ ] Notes
+- [ ] Habits
+- [ ] Goals
+
+### Phase 3 — MVP Launch
+- [ ] Backend Integration
+- [ ] Authentication
+- [ ] Notifications
+- [ ] Testing & Optimization
+- [ ] Google Play Release
+- [ ] Apple App Store Release
+
+## Contributing
+
+Contributions, ideas, and feedback are welcome. Feel free to open an issue or submit a pull request.
+
+## License
+
+This project is licensed under the MIT License.
+
+---
+
+## Developer
+
+Developed by **Mistura Ishola**.
