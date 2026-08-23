@@ -8,7 +8,7 @@ import { Colors, Spacing, Typography } from '@/constants/theme';
 import { loginSchema, LoginInput } from '@/utils/validation';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
-import { Ionicons } from '@expo/vector-icons';
+import { AuthHeader } from '@/components/AuthHeader';
 import { supabase } from '@/lib/supabase';
 
 export default function SignInScreen() {
@@ -69,19 +69,11 @@ export default function SignInScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-        {/* Header Navigation Row */}
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.backButton}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="arrow-back-outline" size={24} color={Colors.text} />
-        </TouchableOpacity>
-
-        <View style={styles.titleSection}>
-          <Text style={styles.titleText}>Welcome back</Text>
-          <Text style={styles.subtitleText}>Sign in to continue organizing your life.</Text>
-        </View>
+        <AuthHeader
+          title="Welcome back"
+          subtitle="Sign in to continue organizing your life."
+          onBack={() => router.back()}
+        />
 
         <View style={styles.formSection}>
           {/* Email field */}
@@ -164,24 +156,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: Spacing.xl,
     paddingBottom: Spacing.xl,
-  },
-  backButton: {
-    paddingVertical: Spacing.sm,
-    alignSelf: 'flex-start',
-    marginBottom: Spacing.lg,
-  },
-  titleSection: {
-    marginBottom: Spacing.xxl,
-  },
-  titleText: {
-    ...Typography.h1,
-    color: Colors.text,
-    marginBottom: Spacing.xs,
-  },
-  subtitleText: {
-    ...Typography.subtitle,
-    color: Colors.textSecondary,
-    fontWeight: '400',
   },
   formSection: {
     marginBottom: Spacing.xl,

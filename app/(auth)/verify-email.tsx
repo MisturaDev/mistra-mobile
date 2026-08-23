@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Typography } from '@/constants/theme';
 import { Button } from '@/components/Button';
+import { Logo } from '@/components/Logo';
 import { OtpInput, OTP_CODE_LENGTH } from '@/components/OtpInput';
 import { supabase } from '@/lib/supabase';
 
@@ -93,10 +94,8 @@ export default function VerifyEmailScreen() {
         <Ionicons name="arrow-back-outline" size={24} color={Colors.text} />
       </TouchableOpacity>
 
-      <View style={styles.iconWrap}>
-        <View style={styles.iconCircle}>
-          <Ionicons name="mail-outline" size={36} color={Colors.primary} />
-        </View>
+      <View style={styles.logoWrap}>
+        <Logo size="sm" />
       </View>
 
       <Text style={styles.title}>Verify your email</Text>
@@ -156,17 +155,9 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     marginBottom: Spacing.lg,
   },
-  iconWrap: {
+  logoWrap: {
     alignItems: 'center',
-    marginBottom: Spacing.xl,
-  },
-  iconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: Colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
+    marginBottom: Spacing.lg,
   },
   title: {
     ...Typography.h1,

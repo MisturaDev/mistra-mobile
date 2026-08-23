@@ -8,7 +8,7 @@ import { Colors, Spacing, Typography } from '@/constants/theme';
 import { signupSchema, SignupInput } from '@/utils/validation';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
-import { Ionicons } from '@expo/vector-icons';
+import { AuthHeader } from '@/components/AuthHeader';
 import { supabase } from '@/lib/supabase';
 
 export default function SignUpScreen() {
@@ -61,19 +61,11 @@ export default function SignUpScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-        {/* Back Button */}
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.backButton}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="arrow-back-outline" size={24} color={Colors.text} />
-        </TouchableOpacity>
-
-        <View style={styles.titleSection}>
-          <Text style={styles.titleText}>Create account</Text>
-          <Text style={styles.subtitleText}>Get started with Mistra today.</Text>
-        </View>
+        <AuthHeader
+          title="Create account"
+          subtitle="Get started with Mistra today."
+          onBack={() => router.back()}
+        />
 
         <View style={styles.formSection}>
           {/* Name Field */}
@@ -184,24 +176,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: Spacing.xl,
     paddingBottom: Spacing.xl,
-  },
-  backButton: {
-    paddingVertical: Spacing.sm,
-    alignSelf: 'flex-start',
-    marginBottom: Spacing.sm,
-  },
-  titleSection: {
-    marginBottom: Spacing.lg,
-  },
-  titleText: {
-    ...Typography.h1,
-    color: Colors.text,
-    marginBottom: Spacing.xs,
-  },
-  subtitleText: {
-    ...Typography.subtitle,
-    color: Colors.textSecondary,
-    fontWeight: '400',
   },
   formSection: {
     marginBottom: Spacing.lg,

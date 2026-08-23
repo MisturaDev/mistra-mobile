@@ -8,6 +8,7 @@ import { Colors, Spacing, Typography } from '@/constants/theme';
 import { forgotPasswordSchema, ForgotPasswordInput } from '@/utils/validation';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
+import { AuthHeader } from '@/components/AuthHeader';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '@/lib/supabase';
 
@@ -73,12 +74,11 @@ export default function ForgotPasswordScreen() {
           </View>
         ) : (
           <>
-            <View style={styles.titleSection}>
-              <Text style={styles.titleText}>Reset password</Text>
-              <Text style={styles.subtitleText}>
-                Enter the email associated with your account and we will send instructions to reset your password.
-              </Text>
-            </View>
+            <AuthHeader
+              title="Reset password"
+              subtitle="Enter the email associated with your account and we will send instructions to reset your password."
+              onBack={() => router.back()}
+            />
 
             <View style={styles.formSection}>
               {/* Email Field */}
