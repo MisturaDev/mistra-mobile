@@ -4,13 +4,14 @@ import { useRouter } from 'expo-router';
 import Constants from 'expo-constants';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, Spacing, Typography } from '@/constants/theme';
-import { Button } from '@/components/Button';
+import { ConfirmModal } from '@/components/ConfirmModal';
 import { Avatar } from '@/components/Avatar';
 import { Card } from '@/components/Card';
 import { useAuth } from '@/providers/AuthProvider';
 import { ProfileMenuRow } from '@/features/profile/ProfileMenuRow';
 import { useNotificationStore } from '@/store/useNotificationStore';
 import { useProfileAvatar } from '@/hooks/useProfileAvatar';
+import { TabScreenHeader } from '@/components/TabScreenHeader';
 import { useTabScreenInsets } from '@/hooks/useTabBarStyle';
 import { getUserNameFromSession } from '@/utils/userName';
 
@@ -18,6 +19,7 @@ export default function ProfileScreen() {
   const router = useRouter();
   const { session, signOut } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [confirmModal, setConfirmModal] = useState<'signOut' | 'deleteAccount' | null>(null);
   const { pushEnabled, hydrate, isHydrated } = useNotificationStore();
   const { avatarUri, pickAvatar, removeAvatar } = useProfileAvatar(session?.user.id);
   const tabInsets = useTabScreenInsets();
@@ -35,28 +37,34 @@ export default function ProfileScreen() {
   const userEmail = session?.user.email ?? '';
   const appVersion = Constants.expoConfig?.version ?? '1.0.0';
 
-  const handleSignOut = () => {
-    Alert.alert('Sign out', 'Are you sure you want to sign out?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Sign Out',
-        style: 'destructive',
-        onPress: async () => {
-          setLoading(true);
-          try {
-            await signOut();
-            router.replace('/(auth)/welcome');
-          } catch (error) {
-            Alert.alert(
-              'Sign out failed',
-              error instanceof Error ? error.message : 'Please try again.'
-            );
-          } finally {
-            setLoading(false);
-          }
-        },
-      },
-    ]);
+  const handleSignOutPress = () => {
+    setConfirmModal('signOut');
+  };
+
+  const handleSignOutConfirm = async () => {
+    setLoading(true);
+    try {
+      await signOut();
+      setConfirmModal(null);
+      router.replace('/(auth)/welcome');
+    } catch (error) {
+      setConfirmModal(null);
+      Alert.alert(
+        'Log out failed',
+        error instanceof Error ? error.message : 'Please try again.'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteAccountPress = () => {
+    setConfirmModal('deleteAccount');
+  };
+
+  const handleDeleteAccountConfirm = () => {
+    setConfirmModal(null);
+    showComingSoon('Delete account');
   };
 
   const showComingSoon = (feature: string) => {
@@ -82,7 +90,7 @@ export default function ProfileScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.scrollContent, { paddingBottom: tabInsets.paddingBottom }]}
       >
-        <Text style={styles.title}>Profile</Text>
+        <TabScreenHeader title="Profile" subtitle="Account, settings, and support" />
 
         <Card style={styles.heroCard} padded elevation="md" bordered={false}>
           <View style={styles.heroContent}>
@@ -126,7 +134,7 @@ export default function ProfileScreen() {
           />
         </Card>
 
-        <Text style={styles.sectionLabel}>Preferences</Text>
+        <Text style={styles.sectionLabel}>Settings</Text>
         <Card style={styles.menuCard} padded elevation="none">
           <ProfileMenuRow
             icon="notifications-outline"
@@ -158,18 +166,50 @@ export default function ProfileScreen() {
           />
         </Card>
 
-        <View style={styles.actions}>
-          <Button
-            title="Sign Out"
-            variant="outline"
-            size="lg"
-            loading={loading}
-            onPress={handleSignOut}
+        <Card style={styles.actionsCard} padded elevation="none">
+          <ProfileMenuRow
+            icon="log-out-outline"
+            label="Log out"
+            onPress={handleSignOutPress}
+            showChevron={false}
           />
-        </View>
+          <View style={styles.actionsDivider} />
+          <ProfileMenuRow
+            icon="trash-outline"
+            label="Delete account"
+            value="Permanently remove your account"
+            destructive
+            onPress={handleDeleteAccountPress}
+            showChevron={false}
+          />
+        </Card>
 
-        <Text style={styles.version}>Mistra v{appVersion}</Text>
+        <View style={styles.footer}>
+          <Text style={styles.footerBrand}>Mistra</Text>
+          <Text style={styles.footerVersion}>Version {appVersion}</Text>
+        </View>
       </ScrollView>
+
+      <ConfirmModal
+        visible={confirmModal === 'signOut'}
+        title="Log out?"
+        message="Are you sure you want to log out of Mistra on this device?"
+        confirmLabel="Log out"
+        destructive
+        loading={loading}
+        onCancel={() => setConfirmModal(null)}
+        onConfirm={handleSignOutConfirm}
+      />
+
+      <ConfirmModal
+        visible={confirmModal === 'deleteAccount'}
+        title="Delete account?"
+        message="This will permanently delete your account and all associated data. This action cannot be undone."
+        confirmLabel="Delete account"
+        destructive
+        onCancel={() => setConfirmModal(null)}
+        onConfirm={handleDeleteAccountConfirm}
+      />
     </SafeAreaView>
   );
 }
@@ -181,12 +221,6 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: Spacing.xl,
-  },
-  title: {
-    ...Typography.h1,
-    color: Colors.text,
-    marginBottom: Spacing.lg,
-    marginTop: Spacing.sm,
   },
   heroCard: {
     backgroundColor: Colors.primaryLight,
@@ -224,13 +258,27 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: Colors.borderLight,
   },
-  actions: {
+  actionsCard: {
     marginTop: Spacing.sm,
     marginBottom: Spacing.lg,
   },
-  version: {
+  actionsDivider: {
+    height: 1,
+    backgroundColor: Colors.borderLight,
+    marginVertical: Spacing.xs,
+  },
+  footer: {
+    alignItems: 'center',
+    gap: Spacing.xs,
+    marginTop: Spacing.xs,
+  },
+  footerBrand: {
+    ...Typography.captionBold,
+    color: Colors.textSecondary,
+    letterSpacing: 0.8,
+  },
+  footerVersion: {
     ...Typography.caption,
     color: Colors.textLight,
-    textAlign: 'center',
   },
 });
