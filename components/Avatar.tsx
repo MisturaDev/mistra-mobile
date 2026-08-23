@@ -90,7 +90,12 @@ export function Avatar({
 
   if (onPress) {
     return (
-      <TouchableOpacity onPress={onPress} activeOpacity={0.85} accessibilityRole="button">
+      <TouchableOpacity
+        onPress={onPress}
+        activeOpacity={0.85}
+        accessibilityRole="button"
+        accessibilityLabel="Profile"
+      >
         {avatarBody}
       </TouchableOpacity>
     );
