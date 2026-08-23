@@ -1,28 +1,19 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { Colors, Spacing, Typography } from '@/constants/theme';
+import { Colors } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
-import { Platform } from 'react-native';
+import { useTabBarStyle } from '@/hooks/useTabBarStyle';
 
 export default function TabsLayout() {
+  const tabBarOptions = useTabBarStyle();
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: Colors.textSecondary,
-        tabBarStyle: {
-          backgroundColor: Colors.white,
-          borderTopWidth: 1,
-          borderTopColor: Colors.borderLight,
-          height: Platform.OS === 'ios' ? 88 : 68,
-          paddingBottom: Platform.OS === 'ios' ? 28 : Spacing.md,
-          paddingTop: Spacing.sm,
-        },
-        tabBarLabelStyle: {
-          ...Typography.captionBold,
-          fontSize: 10,
-        },
+        ...tabBarOptions,
       }}
     >
       <Tabs.Screen
@@ -30,11 +21,7 @@ export default function TabsLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? 'home' : 'home-outline'}
-              size={24}
-              color={color}
-            />
+            <Ionicons name={focused ? 'home' : 'home-outline'} size={24} color={color} />
           ),
         }}
       />
@@ -43,11 +30,7 @@ export default function TabsLayout() {
         options={{
           title: 'Habits',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? 'sparkles' : 'sparkles-outline'}
-              size={24}
-              color={color}
-            />
+            <Ionicons name={focused ? 'sparkles' : 'sparkles-outline'} size={24} color={color} />
           ),
         }}
       />
@@ -69,11 +52,7 @@ export default function TabsLayout() {
         options={{
           title: 'Profile',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? 'person' : 'person-outline'}
-              size={24}
-              color={color}
-            />
+            <Ionicons name={focused ? 'person' : 'person-outline'} size={24} color={color} />
           ),
         }}
       />
