@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useForm, Controller } from 'react-hook-form';
@@ -9,6 +9,7 @@ import { forgotPasswordSchema, ForgotPasswordInput } from '@/utils/validation';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
 import { Ionicons } from '@expo/vector-icons';
+import { supabase } from '@/lib/supabase';
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
@@ -26,13 +27,19 @@ export default function ForgotPasswordScreen() {
     },
   });
 
-  const onSubmit = (data: ForgotPasswordInput) => {
+  const onSubmit = async (data: ForgotPasswordInput) => {
     setLoading(true);
-    // Simulate API delay
-    setTimeout(() => {
-      setLoading(false);
-      setSuccess(true);
-    }, 1200);
+
+    const { error } = await supabase.auth.resetPasswordForEmail(data.email);
+
+    setLoading(false);
+
+    if (error) {
+      Alert.alert('Reset failed', error.message);
+      return;
+    }
+
+    setSuccess(true);
   };
 
   return (
