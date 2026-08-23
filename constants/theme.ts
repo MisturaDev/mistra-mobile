@@ -3,6 +3,7 @@ import { Platform } from 'react-native';
 export const Colors = {
   primary: '#7C3AED',       // Mistra Purple
   primaryLight: '#F5F3FF',  // Very soft purple backdrop
+  primaryMuted: '#DDD6FE',  // Mid purple ring
   primaryDark: '#6D28D9',
   
   white: '#FFFFFF',

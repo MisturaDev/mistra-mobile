@@ -1,56 +1,119 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, ImageSourcePropType, ViewStyle } from 'react-native';
-import { Colors, Radius, Typography } from '@/constants/theme';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ViewStyle,
+  StyleProp,
+} from 'react-native';
+import { Image } from 'expo-image';
+import { Ionicons } from '@expo/vector-icons';
+import { Colors, Typography, Shadows } from '@/constants/theme';
 
 export interface AvatarProps {
-  source?: ImageSourcePropType;
+  uri?: string | null;
   name?: string;
   size?: number;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
+  editable?: boolean;
+  onPress?: () => void;
+  showRing?: boolean;
 }
 
-export const Avatar: React.FC<AvatarProps> = ({
-  source,
+function getInitials(fullName: string) {
+  const parts = fullName.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '';
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+}
+
+export function Avatar({
+  uri,
   name = '',
   size = 48,
   style,
-}) => {
-  const getInitials = (fullName: string) => {
-    const parts = fullName.trim().split(' ');
-    if (parts.length === 0 || !parts[0]) return 'M';
-    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
-  };
+  editable = false,
+  onPress,
+  showRing = false,
+}: AvatarProps) {
+  const initials = getInitials(name);
+  const fontSize = Math.max(12, size * 0.36);
+  const iconSize = Math.max(20, size * 0.42);
+  const ringSize = size + (showRing ? 8 : 0);
+  const badgeSize = Math.max(24, size * 0.3);
 
-  const containerStyle = {
-    width: size,
-    height: size,
-    borderRadius: size / 2,
-    ...(style as object),
-  };
+  const content = uri ? (
+    <Image source={{ uri }} style={[styles.image, { width: size, height: size, borderRadius: size / 2 }]} contentFit="cover" />
+  ) : initials ? (
+    <View style={[styles.fallbackContainer, { width: size, height: size, borderRadius: size / 2 }]}>
+      <Text style={[styles.initialsText, { fontSize }]}>{initials}</Text>
+    </View>
+  ) : (
+    <View style={[styles.fallbackContainer, { width: size, height: size, borderRadius: size / 2 }]}>
+      <Ionicons name="person" size={iconSize} color={Colors.primary} />
+    </View>
+  );
 
-  if (source) {
+  const avatarBody = (
+    <View
+      style={[
+        styles.wrapper,
+        showRing && styles.ring,
+        {
+          width: ringSize,
+          height: ringSize,
+          borderRadius: ringSize / 2,
+        },
+        style,
+      ]}
+    >
+      {content}
+      {editable ? (
+        <View
+          style={[
+            styles.editBadge,
+            {
+              width: badgeSize,
+              height: badgeSize,
+              borderRadius: badgeSize / 2,
+              right: showRing ? 0 : -2,
+              bottom: showRing ? 0 : -2,
+            },
+          ]}
+        >
+          <Ionicons name="camera" size={badgeSize * 0.48} color={Colors.white} />
+        </View>
+      ) : null}
+    </View>
+  );
+
+  if (onPress) {
     return (
-      <Image
-        source={source}
-        style={[styles.image, containerStyle]}
-        resizeMode="cover"
-      />
+      <TouchableOpacity
+        onPress={onPress}
+        activeOpacity={0.85}
+        accessibilityRole="button"
+        accessibilityLabel="Profile"
+      >
+        {avatarBody}
+      </TouchableOpacity>
     );
   }
 
-  // Fallback with initials
-  const initials = getInitials(name);
-  const fontSize = size * 0.4;
-
-  return (
-    <View style={[styles.fallbackContainer, containerStyle]}>
-      <Text style={[styles.initialsText, { fontSize }]}>{initials}</Text>
-    </View>
-  );
-};
+  return avatarBody;
+}
 
 const styles = StyleSheet.create({
+  wrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  ring: {
+    backgroundColor: Colors.white,
+    ...Shadows.sm,
+  },
   image: {
     backgroundColor: Colors.surface,
   },
@@ -58,10 +121,20 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.primaryMuted,
   },
   initialsText: {
     ...Typography.subtitle,
     color: Colors.primary,
-    fontWeight: '600',
+    fontWeight: '700',
+  },
+  editBadge: {
+    position: 'absolute',
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: Colors.white,
   },
 });

@@ -2,8 +2,9 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors, Spacing, Radius, Typography, Shadows } from '@/constants/theme';
+import { Colors, Spacing, Radius, Typography } from '@/constants/theme';
 import { Button } from '@/components/Button';
+import { Logo } from '@/components/Logo';
 
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -11,19 +12,12 @@ export default function WelcomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.heroSection}>
-        {/* Concentric Circle Brand Symbol */}
-        <View style={styles.logoContainer}>
-          <View style={styles.logoOuter}>
-            <View style={styles.logoMiddle}>
-              <View style={styles.logoInner} />
-            </View>
-          </View>
+        <View style={styles.heroCard}>
+          <Logo size="lg" showShadow showWordmark tagline="Your life, organized." />
         </View>
 
-        <Text style={styles.appName}>Mistra</Text>
-        <Text style={styles.tagline}>Your life, organized.</Text>
         <Text style={styles.description}>
-          Manage tasks, establish healthy habits, structure notes, and stay on top of your daily calendar schedules.
+          Plan your day, build habits, and keep everything that matters in one calm place.
         </Text>
       </View>
 
@@ -61,44 +55,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: Spacing.md,
   },
-  logoContainer: {
-    marginBottom: Spacing.xxl,
-  },
-  logoOuter: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+  heroCard: {
     backgroundColor: Colors.primaryLight,
+    borderRadius: Radius.xxl,
+    paddingVertical: Spacing.xxxl,
+    paddingHorizontal: Spacing.xxl,
     alignItems: 'center',
-    justifyContent: 'center',
-    ...Shadows.md,
-  },
-  logoMiddle: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    backgroundColor: '#DDD6FE',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoInner: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: Colors.primary,
-  },
-  appName: {
-    ...Typography.h1,
-    fontSize: 32,
-    color: Colors.text,
-    letterSpacing: 1.5,
-    marginBottom: Spacing.xs,
-  },
-  tagline: {
-    ...Typography.subtitle,
-    color: Colors.primary,
-    fontWeight: '600',
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.xl,
+    width: '100%',
   },
   description: {
     ...Typography.body,

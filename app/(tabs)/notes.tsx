@@ -1,13 +1,25 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { Text, StyleSheet, ScrollView } from 'react-native';
 import { Colors, Spacing, Typography } from '@/constants/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { TabScreenHeader } from '@/components/TabScreenHeader';
+import { useTabScreenInsets } from '@/hooks/useTabBarStyle';
 
 export default function NotesScreen() {
+  const tabInsets = useTabScreenInsets();
+
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Notes</Text>
-      <Text style={styles.placeholder}>Your personal knowledge base. Coming soon.</Text>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: tabInsets.paddingBottom }]}
+      >
+        <TabScreenHeader
+          title="Notes"
+          subtitle="Your personal knowledge base"
+        />
+        <Text style={styles.placeholder}>Notes are coming soon.</Text>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -16,15 +28,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.white,
-    padding: Spacing.xl,
   },
-  title: {
-    ...Typography.h1,
-    color: Colors.text,
-    marginBottom: Spacing.sm,
+  scrollContent: {
+    paddingHorizontal: Spacing.xl,
   },
   placeholder: {
     ...Typography.body,
     color: Colors.textSecondary,
+    lineHeight: 22,
   },
 });
