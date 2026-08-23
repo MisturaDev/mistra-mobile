@@ -38,6 +38,27 @@ export default function SignInScreen() {
     setLoading(false);
 
     if (error) {
+      const isUnverified = error.message.toLowerCase().includes('email not confirmed');
+
+      if (isUnverified) {
+        Alert.alert(
+          'Email not verified',
+          'Enter the verification code we sent to your email.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            {
+              text: 'Enter code',
+              onPress: () =>
+                router.push({
+                  pathname: '/(auth)/verify-email',
+                  params: { email: data.email },
+                }),
+            },
+          ]
+        );
+        return;
+      }
+
       Alert.alert('Sign in failed', error.message);
       return;
     }

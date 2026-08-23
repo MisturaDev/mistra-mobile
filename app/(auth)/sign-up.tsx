@@ -52,11 +52,10 @@ export default function SignUpScreen() {
       return;
     }
 
-    Alert.alert(
-      'Check your email',
-      'We sent a confirmation link. Open it, then sign in.',
-      [{ text: 'OK', onPress: () => router.replace('/(auth)/sign-in') }]
-    );
+    router.push({
+      pathname: '/(auth)/verify-email',
+      params: { email: data.email },
+    });
   };
 
   return (
