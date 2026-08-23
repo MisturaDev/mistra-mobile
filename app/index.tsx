@@ -3,10 +3,12 @@ import { View, Text, StyleSheet, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Colors, Spacing, Typography } from '@/constants/theme';
 import { useAppStore } from '@/store/useAppStore';
+import { useAuth } from '@/providers/AuthProvider';
 
 export default function SplashScreen() {
   const router = useRouter();
   const onboardingCompleted = useAppStore((state) => state.onboardingCompleted);
+  const { session, isLoading } = useAuth();
 
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -28,9 +30,13 @@ export default function SplashScreen() {
       }),
     ]).start();
 
-    // Route check after delay
+    // Route check after delay (wait for auth session to load)
     const timer = setTimeout(() => {
-      if (onboardingCompleted) {
+      if (isLoading) return;
+
+      if (session) {
+        router.replace('/(tabs)');
+      } else if (onboardingCompleted) {
         router.replace('/(auth)/welcome');
       } else {
         router.replace('/onboarding');
@@ -38,7 +44,7 @@ export default function SplashScreen() {
     }, 1800);
 
     return () => clearTimeout(timer);
-  }, [onboardingCompleted]);
+  }, [onboardingCompleted, session, isLoading]);
 
   return (
     <View style={styles.container}>
