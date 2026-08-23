@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import Constants from 'expo-constants';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors, Spacing, Radius, Typography } from '@/constants/theme';
+import { Colors, Spacing, Typography } from '@/constants/theme';
 import { Button } from '@/components/Button';
 import { Avatar } from '@/components/Avatar';
 import { Card } from '@/components/Card';
@@ -12,15 +12,7 @@ import { ProfileMenuRow } from '@/features/profile/ProfileMenuRow';
 import { useNotificationStore } from '@/store/useNotificationStore';
 import { useProfileAvatar } from '@/hooks/useProfileAvatar';
 import { useTabScreenInsets } from '@/hooks/useTabBarStyle';
-
-function formatMemberSince(dateString?: string) {
-  if (!dateString) return 'Recently joined';
-
-  return new Date(dateString).toLocaleDateString('en-US', {
-    month: 'long',
-    year: 'numeric',
-  });
-}
+import { getUserNameFromSession } from '@/utils/userName';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -34,14 +26,13 @@ export default function ProfileScreen() {
     hydrate();
   }, [hydrate]);
 
-  const userName =
-    (session?.user.user_metadata?.name as string | undefined) ??
-    session?.user.email?.split('@')[0] ??
-    'User';
+  const userName = getUserNameFromSession(
+    session?.user.user_metadata?.name as string | undefined,
+    session?.user.email,
+    'User'
+  );
 
   const userEmail = session?.user.email ?? '';
-  const isVerified = Boolean(session?.user.email_confirmed_at);
-  const memberSince = formatMemberSince(session?.user.created_at);
   const appVersion = Constants.expoConfig?.version ?? '1.0.0';
 
   const handleSignOut = () => {
@@ -108,17 +99,6 @@ export default function ProfileScreen() {
             </Text>
             <Text style={styles.name}>{userName}</Text>
             <Text style={styles.email}>{userEmail}</Text>
-
-            <View style={styles.badges}>
-              <View style={[styles.badge, isVerified ? styles.badgeSuccess : styles.badgeMuted]}>
-                <Text style={[styles.badgeText, isVerified ? styles.badgeTextSuccess : null]}>
-                  {isVerified ? 'Email verified' : 'Email not verified'}
-                </Text>
-              </View>
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>Member since {memberSince}</Text>
-              </View>
-            </View>
           </View>
         </Card>
 
@@ -229,32 +209,6 @@ const styles = StyleSheet.create({
     ...Typography.body,
     color: Colors.textSecondary,
     marginTop: Spacing.xs,
-  },
-  badges: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: Spacing.sm,
-    marginTop: Spacing.lg,
-  },
-  badge: {
-    backgroundColor: Colors.white,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-    borderRadius: Radius.full,
-  },
-  badgeSuccess: {
-    backgroundColor: Colors.successLight,
-  },
-  badgeMuted: {
-    backgroundColor: Colors.borderLight,
-  },
-  badgeText: {
-    ...Typography.captionBold,
-    color: Colors.textSecondary,
-  },
-  badgeTextSuccess: {
-    color: Colors.success,
   },
   sectionLabel: {
     ...Typography.captionBold,

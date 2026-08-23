@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { Colors, Spacing, Radius, Typography, Shadows } from '@/constants/theme';
 import { Avatar } from '@/components/Avatar';
 import { useTabScreenInsets } from '@/hooks/useTabBarStyle';
 import { useAuth } from '@/providers/AuthProvider';
 import { useProfileAvatar } from '@/hooks/useProfileAvatar';
+import { getFirstName, getUserNameFromSession } from '@/utils/userName';
 import { ProgressBar } from '@/components/ProgressBar';
 import { Card } from '@/components/Card';
 import { StatCard } from '@/features/dashboard/StatCard';
@@ -45,14 +47,17 @@ interface Note {
 }
 
 export default function HomeDashboardScreen() {
+  const router = useRouter();
   const tabInsets = useTabScreenInsets();
   const { session } = useAuth();
   const { avatarUri } = useProfileAvatar(session?.user.id);
 
-  const userName =
-    (session?.user.user_metadata?.name as string | undefined) ??
-    session?.user.email?.split('@')[0] ??
-    'Mistura';
+  const userName = getUserNameFromSession(
+    session?.user.user_metadata?.name as string | undefined,
+    session?.user.email,
+    'Mistura'
+  );
+  const firstName = getFirstName(userName, 'Mistura');
 
   // State for Tasks
   const [tasks, setTasks] = useState<Task[]>([
@@ -146,11 +151,17 @@ export default function HomeDashboardScreen() {
         <View style={styles.headerRow}>
           <View style={styles.headerTextWrap}>
             <Text style={styles.greetingText} numberOfLines={2}>
-              {getGreeting()}, <Text style={styles.nameHighlight}>{userName}</Text>
+              {getGreeting()}, <Text style={styles.nameHighlight}>{firstName}</Text>
             </Text>
             <Text style={styles.dateText}>{getFormattedDate()}</Text>
           </View>
-          <Avatar uri={avatarUri} name={userName} size={48} showRing />
+          <Avatar
+            uri={avatarUri}
+            name={firstName}
+            size={48}
+            showRing
+            onPress={() => router.push('/(tabs)/profile')}
+          />
         </View>
 
         {/* Dynamic Progress Card */}
