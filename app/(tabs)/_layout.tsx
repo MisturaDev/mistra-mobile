@@ -30,7 +30,7 @@ export default function TabsLayout() {
         options={{
           title: 'Habits',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'sparkles' : 'sparkles-outline'} size={24} color={color} />
+            <Ionicons name={focused ? 'repeat' : 'repeat-outline'} size={24} color={color} />
           ),
         }}
       />

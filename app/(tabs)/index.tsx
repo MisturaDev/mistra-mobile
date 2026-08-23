@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Colors, Spacing, Radius, Typography, Shadows } from '@/constants/theme';
 import { Avatar } from '@/components/Avatar';
+import { DashboardTabHeader } from '@/components/TabScreenHeader';
 import { useTabScreenInsets } from '@/hooks/useTabBarStyle';
 import { useAuth } from '@/providers/AuthProvider';
 import { useProfileAvatar } from '@/hooks/useProfileAvatar';
@@ -147,22 +148,20 @@ export default function HomeDashboardScreen() {
         contentContainerStyle={[styles.scrollContainer, { paddingBottom: tabInsets.paddingBottom }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header greeting row */}
-        <View style={styles.headerRow}>
-          <View style={styles.headerTextWrap}>
-            <Text style={styles.greetingText} numberOfLines={2}>
-              {getGreeting()}, <Text style={styles.nameHighlight}>{firstName}</Text>
-            </Text>
-            <Text style={styles.dateText}>{getFormattedDate()}</Text>
-          </View>
-          <Avatar
-            uri={avatarUri}
-            name={firstName}
-            size={48}
-            showRing
-            onPress={() => router.push('/(tabs)/profile')}
-          />
-        </View>
+        <DashboardTabHeader
+          greeting={getGreeting()}
+          firstName={firstName}
+          date={getFormattedDate()}
+          right={
+            <Avatar
+              uri={avatarUri}
+              name={firstName}
+              size={48}
+              showRing
+              onPress={() => router.push('/(tabs)/profile')}
+            />
+          }
+        />
 
         {/* Dynamic Progress Card */}
         <Card style={styles.progressCard} padded elevation="md" bordered={false}>
@@ -276,34 +275,6 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     paddingHorizontal: Spacing.xl,
-    paddingTop: Spacing.md,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: Spacing.md,
-    marginBottom: Spacing.xl,
-  },
-  headerTextWrap: {
-    flex: 1,
-    flexShrink: 1,
-    minWidth: 0,
-  },
-  dateText: {
-    ...Typography.captionBold,
-    color: Colors.textSecondary,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginTop: Spacing.xs,
-  },
-  greetingText: {
-    ...Typography.h2,
-    color: Colors.text,
-  },
-  nameHighlight: {
-    fontWeight: '700',
-    color: Colors.primary,
   },
   progressCard: {
     backgroundColor: Colors.primaryLight,
