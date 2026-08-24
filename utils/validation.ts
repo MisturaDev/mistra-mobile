@@ -21,6 +21,11 @@ export const forgotPasswordSchema = z.object({
   email: z.string().trim().min(1, 'Email is required').email('Invalid email address'),
 });
 
+export const profileNameSchema = z.object({
+  name: z.string().trim().min(2, 'Name must be at least 2 characters'),
+});
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type SignupInput = z.infer<typeof signupSchema>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+export type ProfileNameInput = z.infer<typeof profileNameSchema>;
