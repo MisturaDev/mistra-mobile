@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Colors, Spacing, Typography } from '@/constants/theme';
@@ -8,6 +8,8 @@ import { DashboardTabHeader } from '@/components/TabScreenHeader';
 import { useTabScreenInsets } from '@/hooks/useTabBarStyle';
 import { useAuth } from '@/providers/AuthProvider';
 import { useProfileAvatar } from '@/hooks/useProfileAvatar';
+import { useTasks } from '@/hooks/useTasks';
+import { useHabits } from '@/hooks/useHabits';
 import { getFirstName, getUserNameFromSession } from '@/utils/userName';
 import { ProgressBar } from '@/components/ProgressBar';
 import { Card } from '@/components/Card';
@@ -15,21 +17,7 @@ import { DashboardSection } from '@/features/dashboard/DashboardSection';
 import { TaskItem } from '@/features/dashboard/TaskItem';
 import { HabitItem } from '@/features/dashboard/HabitItem';
 
-interface Task {
-  id: string;
-  title: string;
-  completed: boolean;
-}
-
-interface Habit {
-  id: string;
-  name: string;
-  streak: number;
-  completed: boolean;
-}
-
 const HABIT_PREVIEW_LIMIT = 3;
-
 function getGreeting() {
   const hour = new Date().getHours();
   if (hour < 12) return 'Good morning';
@@ -64,22 +52,26 @@ export default function HomeDashboardScreen() {
     'Mistura'
   );
   const firstName = getFirstName(userName, 'Mistura');
+  const userId = session?.user.id;
 
-  const [tasks, setTasks] = useState<Task[]>([
-    { id: '1', title: "Review today's priorities", completed: true },
-    { id: '2', title: 'Finish project proposal', completed: true },
-    { id: '3', title: 'Reply to client emails', completed: false },
-    { id: '4', title: "Plan tomorrow's schedule", completed: false },
-    { id: '5', title: 'Pick up groceries', completed: false },
-  ]);
+  const {
+    tasks,
+    isLoading: tasksLoading,
+    isError: tasksError,
+    refetch: refetchTasks,
+    toggleTask,
+  } = useTasks(userId);
 
-  const [habits, setHabits] = useState<Habit[]>([
-    { id: '1', name: 'Meditate 10m', streak: 5, completed: true },
-    { id: '2', name: 'Read 15 pages', streak: 12, completed: true },
-    { id: '3', name: 'Workout 30m', streak: 3, completed: false },
-    { id: '4', name: 'Drink 2L water', streak: 8, completed: false },
-  ]);
+  const {
+    habits,
+    isLoading: habitsLoading,
+    isError: habitsError,
+    refetch: refetchHabits,
+    toggleHabit,
+  } = useHabits(userId);
 
+  const isLoading = tasksLoading || habitsLoading;
+  const hasError = tasksError || habitsError;
   const completedTasks = tasks.filter((task) => task.completed).length;
   const completedHabits = habits.filter((habit) => habit.completed).length;
   const totalItems = tasks.length + habits.length;
@@ -89,29 +81,10 @@ export default function HomeDashboardScreen() {
 
   const visibleHabits = useMemo(() => habits.slice(0, HABIT_PREVIEW_LIMIT), [habits]);
 
-  const handleToggleTask = (id: string) => {
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id === id ? { ...task, completed: !task.completed } : task
-      )
-    );
+  const handleRetry = () => {
+    refetchTasks();
+    refetchHabits();
   };
-
-  const handleToggleHabit = (id: string) => {
-    setHabits((prevHabits) =>
-      prevHabits.map((habit) => {
-        if (habit.id !== id) return habit;
-
-        const wasCompleted = habit.completed;
-        return {
-          ...habit,
-          completed: !wasCompleted,
-          streak: wasCompleted ? Math.max(0, habit.streak - 1) : habit.streak + 1,
-        };
-      })
-    );
-  };
-
   return (
     <SafeAreaView style={styles.safeContainer} edges={['top', 'left', 'right']}>
       <ScrollView
@@ -154,39 +127,67 @@ export default function HomeDashboardScreen() {
           </Text>
         </Card>
 
-        <DashboardSection title="Today's tasks">
-          <Card style={styles.listCard} padded elevation="none">
-            {tasks.map((task) => (
-              <TaskItem
-                key={task.id}
-                id={task.id}
-                title={task.title}
-                completed={task.completed}
-                onToggle={handleToggleTask}
-              />
-            ))}
-          </Card>
-        </DashboardSection>
-
-        <DashboardSection
-          title="Today's habits"
-          actionLabel="See all"
-          onActionPress={() => router.push('/(tabs)/habits')}
-        >
-          <View style={styles.habitsList}>
-            {visibleHabits.map((habit) => (
-              <HabitItem
-                key={habit.id}
-                id={habit.id}
-                name={habit.name}
-                streak={habit.streak}
-                completed={habit.completed}
-                onToggle={handleToggleHabit}
-              />
-            ))}
+        {isLoading ? (
+          <View style={styles.stateContainer}>
+            <ActivityIndicator size="small" color={Colors.primary} />
           </View>
-        </DashboardSection>
-      </ScrollView>
+        ) : null}
+
+        {hasError ? (
+          <Card style={styles.stateCard} padded elevation="none">
+            <Text style={styles.stateText}>Could not load your dashboard.</Text>
+            <TouchableOpacity onPress={handleRetry} activeOpacity={0.7}>
+              <Text style={styles.retryText}>Tap to retry</Text>
+            </TouchableOpacity>
+          </Card>
+        ) : null}
+
+        {!isLoading && !hasError ? (
+          <>
+            <DashboardSection title="Today's tasks">
+              <Card style={styles.listCard} padded elevation="none">
+                {tasks.length === 0 ? (
+                  <Text style={styles.emptyText}>No tasks yet.</Text>
+                ) : (
+                  tasks.map((task) => (
+                    <TaskItem
+                      key={task.id}
+                      id={task.id}
+                      title={task.title}
+                      completed={task.completed}
+                      onToggle={toggleTask}
+                    />
+                  ))
+                )}
+              </Card>
+            </DashboardSection>
+
+            <DashboardSection
+              title="Today's habits"
+              actionLabel="See all"
+              onActionPress={() => router.push('/(tabs)/habits')}
+            >
+              <View style={styles.habitsList}>
+                {visibleHabits.length === 0 ? (
+                  <Card style={styles.listCard} padded elevation="none">
+                    <Text style={styles.emptyText}>No habits yet. Your habit list will show here.</Text>
+                  </Card>
+                ) : (
+                  visibleHabits.map((habit) => (
+                    <HabitItem
+                      key={habit.id}
+                      id={habit.id}
+                      name={habit.name}
+                      streak={habit.streak}
+                      completed={habit.completed}
+                      onToggle={toggleHabit}
+                    />
+                  ))
+                )}
+              </View>
+            </DashboardSection>
+          </>
+        ) : null}      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -243,5 +244,30 @@ const styles = StyleSheet.create({
   },
   habitsList: {
     gap: 0,
+  },
+  stateContainer: {
+    alignItems: 'center',
+    paddingVertical: Spacing.lg,
+  },
+  stateCard: {
+    backgroundColor: Colors.surface,
+    marginBottom: Spacing.lg,
+    alignItems: 'center',
+  },
+  stateText: {
+    ...Typography.body,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+  },
+  retryText: {
+    ...Typography.bodyBold,
+    color: Colors.primary,
+    marginTop: Spacing.sm,
+  },
+  emptyText: {
+    ...Typography.body,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    paddingVertical: Spacing.sm,
   },
 });
