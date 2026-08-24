@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Colors, Spacing, Typography } from '@/constants/theme';
-import { signupSchema, SignupInput } from '@/utils/validation';
+import { signupSchema, SignupInput, PASSWORD_HINT } from '@/utils/validation';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
 import { AuthHeader } from '@/components/AuthHeader';
@@ -75,7 +75,7 @@ export default function SignUpScreen() {
             render={({ field: { onChange, onBlur, value } }) => (
               <Input
                 label="Full Name"
-                placeholder="John Doe"
+                placeholder="Your full name"
                 autoComplete="name"
                 iconName="person-outline"
                 onBlur={onBlur}
@@ -94,7 +94,7 @@ export default function SignUpScreen() {
             render={({ field: { onChange, onBlur, value } }) => (
               <Input
                 label="Email Address"
-                placeholder="john@example.com"
+                placeholder="you@example.com"
                 keyboardType="email-address"
                 autoComplete="email"
                 iconName="mail-outline"
@@ -114,7 +114,8 @@ export default function SignUpScreen() {
             render={({ field: { onChange, onBlur, value } }) => (
               <Input
                 label="Password"
-                placeholder="••••••••"
+                placeholder="Create a password"
+                hint={PASSWORD_HINT}
                 secureTextEntry
                 iconName="lock-closed-outline"
                 onBlur={onBlur}
@@ -133,7 +134,7 @@ export default function SignUpScreen() {
             render={({ field: { onChange, onBlur, value } }) => (
               <Input
                 label="Confirm Password"
-                placeholder="••••••••"
+                placeholder="Confirm your password"
                 secureTextEntry
                 iconName="lock-closed-outline"
                 onBlur={onBlur}

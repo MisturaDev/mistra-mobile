@@ -88,7 +88,7 @@ export default function ForgotPasswordScreen() {
                 render={({ field: { onChange, onBlur, value } }) => (
                   <Input
                     label="Email Address"
-                    placeholder="name@domain.com"
+                    placeholder="you@example.com"
                     keyboardType="email-address"
                     autoComplete="email"
                     iconName="mail-outline"
