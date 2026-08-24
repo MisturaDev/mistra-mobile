@@ -259,7 +259,7 @@ export default function HomeDashboardScreen() {
                 <View style={styles.habitsList}>
                   {visibleHabits.length === 0 ? (
                     <Card style={styles.listCard} padded elevation="none">
-                      <Text style={styles.emptyText}>No habits yet. Your habit list will show here.</Text>
+                      <Text style={styles.emptyText}>No habits yet. Tap See all to add one.</Text>
                     </Card>
                   ) : (
                     visibleHabits.map((habit) => (
