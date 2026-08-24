@@ -2,8 +2,13 @@ import { create } from 'zustand';
 import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
+import {
+  fetchProfileAvatarUrl,
+  removeProfileAvatar,
+  uploadProfileAvatar,
+} from '@/lib/avatarStorage';
 
-const storageKey = (userId: string) => `mistra-avatar-${userId}`;
+const cacheKey = (userId: string) => `mistra-avatar-${userId}`;
 
 interface AvatarState {
   avatarUri: string | null;
@@ -14,7 +19,7 @@ interface AvatarState {
   removeAvatar: (userId: string) => Promise<void>;
 }
 
-export const useAvatarStore = create<AvatarState>((set, get) => ({
+export const useAvatarStore = create<AvatarState>((set) => ({
   avatarUri: null,
   activeUserId: null,
   isLoading: false,
@@ -23,10 +28,23 @@ export const useAvatarStore = create<AvatarState>((set, get) => ({
     set({ isLoading: true, activeUserId: userId });
 
     try {
-      const uri = await AsyncStorage.getItem(storageKey(userId));
-      set({ avatarUri: uri, isLoading: false });
-    } catch {
+      const remoteUrl = await fetchProfileAvatarUrl(userId);
+
+      if (remoteUrl) {
+        await AsyncStorage.setItem(cacheKey(userId), remoteUrl);
+        set({ avatarUri: remoteUrl, isLoading: false });
+        return;
+      }
+
+      await AsyncStorage.removeItem(cacheKey(userId));
       set({ avatarUri: null, isLoading: false });
+    } catch {
+      try {
+        const cachedUri = await AsyncStorage.getItem(cacheKey(userId));
+        set({ avatarUri: cachedUri, isLoading: false });
+      } catch {
+        set({ avatarUri: null, isLoading: false });
+      }
     }
   },
 
@@ -49,13 +67,34 @@ export const useAvatarStore = create<AvatarState>((set, get) => ({
 
     if (result.canceled || !result.assets[0]?.uri) return;
 
-    const uri = result.assets[0].uri;
-    await AsyncStorage.setItem(storageKey(userId), uri);
-    set({ avatarUri: uri, activeUserId: userId });
+    set({ isLoading: true, activeUserId: userId });
+
+    try {
+      const publicUrl = await uploadProfileAvatar(userId, result.assets[0].uri);
+      await AsyncStorage.setItem(cacheKey(userId), publicUrl);
+      set({ avatarUri: publicUrl, isLoading: false, activeUserId: userId });
+    } catch (error) {
+      set({ isLoading: false });
+      Alert.alert(
+        'Upload failed',
+        error instanceof Error ? error.message : 'Could not save your profile photo.'
+      );
+    }
   },
 
   removeAvatar: async (userId) => {
-    await AsyncStorage.removeItem(storageKey(userId));
-    set({ avatarUri: null, activeUserId: userId });
+    set({ isLoading: true, activeUserId: userId });
+
+    try {
+      await removeProfileAvatar(userId);
+      await AsyncStorage.removeItem(cacheKey(userId));
+      set({ avatarUri: null, isLoading: false, activeUserId: userId });
+    } catch (error) {
+      set({ isLoading: false });
+      Alert.alert(
+        'Remove failed',
+        error instanceof Error ? error.message : 'Could not remove your profile photo.'
+      );
+    }
   },
 }));
