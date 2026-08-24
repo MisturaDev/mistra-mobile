@@ -19,7 +19,7 @@ export function DashboardSection({
     <View style={styles.section}>
       <View style={styles.header}>
         <Text style={styles.title}>{title}</Text>
-        {actionLabel && onActionPress ? (
+        {actionLabel != null && onActionPress != null ? (
           <TouchableOpacity onPress={onActionPress} activeOpacity={0.7} hitSlop={8}>
             <Text style={styles.action}>{actionLabel}</Text>
           </TouchableOpacity>

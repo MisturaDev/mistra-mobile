@@ -85,109 +85,112 @@ export default function HomeDashboardScreen() {
     refetchTasks();
     refetchHabits();
   };
+
+  const showLists = !isLoading && !hasError;
+
   return (
     <SafeAreaView style={styles.safeContainer} edges={['top', 'left', 'right']}>
       <ScrollView
         contentContainerStyle={[styles.scrollContainer, { paddingBottom: tabInsets.paddingBottom }]}
         showsVerticalScrollIndicator={false}
       >
-        <DashboardTabHeader
-          greeting={getGreeting()}
-          firstName={firstName}
-          date={getFormattedDate()}
-          right={
-            <Avatar
-              uri={avatarUri}
-              name={firstName}
-              size={48}
-              showRing
-              onPress={() => router.push('/(tabs)/profile')}
-            />
-          }
-        />
-
-        <Card style={styles.progressCard} padded elevation="md" bordered={false}>
-          <View style={styles.progressHeader}>
-            <View style={styles.progressCopy}>
-              <Text style={styles.progressTitle}>Today</Text>
-              <Text style={styles.progressSub}>{getProgressMessage(progressPercentage)}</Text>
-            </View>
-            <Text style={styles.progressPercent}>{progressPercentage}%</Text>
-          </View>
-
-          <ProgressBar
-            progress={progressRatio}
-            height={10}
-            backgroundColor={Colors.primaryMuted}
-            style={styles.progressBar}
+        <View style={styles.content}>
+          <DashboardTabHeader
+            greeting={getGreeting()}
+            firstName={firstName}
+            date={getFormattedDate()}
+            right={
+              <Avatar
+                uri={avatarUri}
+                name={firstName}
+                size={48}
+                showRing
+                onPress={() => router.push('/(tabs)/profile')}
+              />
+            }
           />
-
-          <Text style={styles.progressMeta}>
-            Tasks {completedTasks}/{tasks.length} · Habits {completedHabits}/{habits.length}
-          </Text>
-        </Card>
-
-        {isLoading ? (
-          <View style={styles.stateContainer}>
-            <ActivityIndicator size="small" color={Colors.primary} />
-          </View>
-        ) : null}
-
-        {hasError ? (
-          <Card style={styles.stateCard} padded elevation="none">
-            <Text style={styles.stateText}>Could not load your dashboard.</Text>
-            <TouchableOpacity onPress={handleRetry} activeOpacity={0.7}>
-              <Text style={styles.retryText}>Tap to retry</Text>
-            </TouchableOpacity>
-          </Card>
-        ) : null}
-
-        {!isLoading && !hasError ? (
-          <>
-            <DashboardSection title="Today's tasks">
-              <Card style={styles.listCard} padded elevation="none">
-                {tasks.length === 0 ? (
-                  <Text style={styles.emptyText}>No tasks yet.</Text>
-                ) : (
-                  tasks.map((task) => (
-                    <TaskItem
-                      key={task.id}
-                      id={task.id}
-                      title={task.title}
-                      completed={task.completed}
-                      onToggle={toggleTask}
-                    />
-                  ))
-                )}
-              </Card>
-            </DashboardSection>
-
-            <DashboardSection
-              title="Today's habits"
-              actionLabel="See all"
-              onActionPress={() => router.push('/(tabs)/habits')}
-            >
-              <View style={styles.habitsList}>
-                {visibleHabits.length === 0 ? (
-                  <Card style={styles.listCard} padded elevation="none">
-                    <Text style={styles.emptyText}>No habits yet. Your habit list will show here.</Text>
-                  </Card>
-                ) : (
-                  visibleHabits.map((habit) => (
-                    <HabitItem
-                      key={habit.id}
-                      id={habit.id}
-                      name={habit.name}
-                      streak={habit.streak}
-                      completed={habit.completed}
-                      onToggle={toggleHabit}
-                    />
-                  ))
-                )}
+          <Card style={styles.progressCard} padded elevation="md" bordered={false}>
+            <View>
+              <View style={styles.progressHeader}>
+                <View style={styles.progressCopy}>
+                  <Text style={styles.progressTitle}>Today</Text>
+                  <Text style={styles.progressSub}>{getProgressMessage(progressPercentage)}</Text>
+                </View>
+                <Text style={styles.progressPercent}>{progressPercentage}%</Text>
               </View>
-            </DashboardSection>
-          </>
-        ) : null}      </ScrollView>
+              <ProgressBar
+                progress={progressRatio}
+                height={10}
+                backgroundColor={Colors.primaryMuted}
+                style={styles.progressBar}
+              />
+              <Text style={styles.progressMeta}>
+                Tasks {completedTasks}/{tasks.length} · Habits {completedHabits}/{habits.length}
+              </Text>
+            </View>
+          </Card>
+          {isLoading ? (
+            <View style={styles.stateContainer}>
+              <ActivityIndicator size="small" color={Colors.primary} />
+            </View>
+          ) : null}
+          {hasError ? (
+            <Card style={styles.stateCard} padded elevation="none">
+              <View style={styles.stateCardContent}>
+                <Text style={styles.stateText}>Could not load your dashboard.</Text>
+                <TouchableOpacity onPress={handleRetry} activeOpacity={0.7}>
+                  <Text style={styles.retryText}>Tap to retry</Text>
+                </TouchableOpacity>
+              </View>
+            </Card>
+          ) : null}
+          {showLists ? (
+            <View style={styles.listsSection}>
+              <DashboardSection title="Today's tasks">
+                <Card style={styles.listCard} padded elevation="none">
+                  {tasks.length === 0 ? (
+                    <Text style={styles.emptyText}>No tasks yet.</Text>
+                  ) : (
+                    tasks.map((task) => (
+                      <TaskItem
+                        key={task.id}
+                        id={task.id}
+                        title={task.title}
+                        completed={task.completed}
+                        onToggle={toggleTask}
+                      />
+                    ))
+                  )}
+                </Card>
+              </DashboardSection>
+              <DashboardSection
+                title="Today's habits"
+                actionLabel="See all"
+                onActionPress={() => router.push('/(tabs)/habits')}
+              >
+                <View style={styles.habitsList}>
+                  {visibleHabits.length === 0 ? (
+                    <Card style={styles.listCard} padded elevation="none">
+                      <Text style={styles.emptyText}>No habits yet. Your habit list will show here.</Text>
+                    </Card>
+                  ) : (
+                    visibleHabits.map((habit) => (
+                      <HabitItem
+                        key={habit.id}
+                        id={habit.id}
+                        name={habit.name}
+                        streak={habit.streak}
+                        completed={habit.completed}
+                        onToggle={toggleHabit}
+                      />
+                    ))
+                  )}
+                </View>
+              </DashboardSection>
+            </View>
+          ) : null}
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -199,6 +202,12 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     paddingHorizontal: Spacing.xl,
+  },
+  content: {
+    gap: 0,
+  },
+  listsSection: {
+    gap: 0,
   },
   progressCard: {
     backgroundColor: Colors.primaryLight,
@@ -252,6 +261,8 @@ const styles = StyleSheet.create({
   stateCard: {
     backgroundColor: Colors.surface,
     marginBottom: Spacing.lg,
+  },
+  stateCardContent: {
     alignItems: 'center',
   },
   stateText: {
