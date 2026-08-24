@@ -13,12 +13,17 @@ import { useNotificationStore } from '@/store/useNotificationStore';
 import { useProfileAvatar } from '@/hooks/useProfileAvatar';
 import { TabScreenHeader } from '@/components/TabScreenHeader';
 import { useTabScreenInsets } from '@/hooks/useTabBarStyle';
+import { EditProfileModal } from '@/components/EditProfileModal';
+import { updateProfileName } from '@/lib/profileStorage';
+import { toast } from '@/components/AppToast';
 import { getUserNameFromSession } from '@/utils/userName';
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { session, signOut } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [editProfileVisible, setEditProfileVisible] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
   const [confirmModal, setConfirmModal] = useState<'signOut' | 'deleteAccount' | null>(null);
   const { pushEnabled, hydrate, isHydrated } = useNotificationStore();
   const { avatarUri, pickAvatar, removeAvatar } = useProfileAvatar(session?.user.id);
@@ -33,6 +38,7 @@ export default function ProfileScreen() {
     session?.user.email,
     'User'
   );
+  const profileName = (session?.user.user_metadata?.name as string | undefined)?.trim() ?? '';
 
   const userEmail = session?.user.email ?? '';
   const appVersion = Constants.expoConfig?.version ?? '1.0.0';
@@ -69,6 +75,24 @@ export default function ProfileScreen() {
 
   const showComingSoon = (feature: string) => {
     Alert.alert('Coming soon', `${feature} will be available in a future update.`);
+  };
+
+  const handleSaveProfile = async (name: string) => {
+    if (!session?.user.id) return;
+
+    setSavingProfile(true);
+    try {
+      await updateProfileName(session.user.id, name);
+      setEditProfileVisible(false);
+      toast.success({ message: 'Profile updated' });
+    } catch (error) {
+      Alert.alert(
+        'Could not update profile',
+        error instanceof Error ? error.message : 'Please try again.'
+      );
+    } finally {
+      setSavingProfile(false);
+    }
   };
 
   const handleAvatarPress = () => {
@@ -115,8 +139,8 @@ export default function ProfileScreen() {
           <ProfileMenuRow
             icon="person-outline"
             label="Edit profile"
-            value="Update your name and details"
-            onPress={() => showComingSoon('Edit profile')}
+            value="Update your name"
+            onPress={() => setEditProfileVisible(true)}
           />
           <View style={styles.divider} />
           <ProfileMenuRow
@@ -189,6 +213,14 @@ export default function ProfileScreen() {
           <Text style={styles.footerVersion}>Version {appVersion}</Text>
         </View>
       </ScrollView>
+
+      <EditProfileModal
+        visible={editProfileVisible}
+        initialName={profileName}
+        loading={savingProfile}
+        onClose={() => setEditProfileVisible(false)}
+        onSubmit={(name) => void handleSaveProfile(name)}
+      />
 
       <ConfirmModal
         visible={confirmModal === 'signOut'}
