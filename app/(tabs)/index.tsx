@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Colors, Spacing, Typography } from '@/constants/theme';
@@ -16,6 +16,9 @@ import { Card } from '@/components/Card';
 import { DashboardSection } from '@/features/dashboard/DashboardSection';
 import { TaskItem } from '@/features/dashboard/TaskItem';
 import { HabitItem } from '@/features/dashboard/HabitItem';
+import { TaskFormModal } from '@/components/TaskFormModal';
+import { ConfirmModal } from '@/components/ConfirmModal';
+import { toast } from '@/components/AppToast';
 
 const HABIT_PREVIEW_LIMIT = 3;
 function getGreeting() {
@@ -54,12 +57,21 @@ export default function HomeDashboardScreen() {
   const firstName = getFirstName(userName, 'Mistura');
   const userId = session?.user.id;
 
+  const [taskForm, setTaskForm] = useState<
+    { mode: 'create' } | { mode: 'edit'; taskId: string; initialTitle: string } | null
+  >(null);
+  const [taskToDelete, setTaskToDelete] = useState<{ id: string; title: string } | null>(null);
+
   const {
     tasks,
     isLoading: tasksLoading,
     isError: tasksError,
+    isSaving: tasksSaving,
     refetch: refetchTasks,
     toggleTask,
+    createTask,
+    updateTask,
+    deleteTask,
   } = useTasks(userId);
 
   const {
@@ -87,6 +99,76 @@ export default function HomeDashboardScreen() {
   };
 
   const showLists = !isLoading && !hasError;
+
+  const closeTaskForm = () => setTaskForm(null);
+
+  const handleCreateTask = async (title: string) => {
+    try {
+      await createTask(title);
+      closeTaskForm();
+      toast.success({ message: 'Task added' });
+    } catch (error) {
+      Alert.alert(
+        'Could not add task',
+        error instanceof Error ? error.message : 'Please try again.'
+      );
+    }
+  };
+
+  const handleUpdateTask = async (title: string) => {
+    if (!taskForm || taskForm.mode !== 'edit') return;
+
+    try {
+      await updateTask(taskForm.taskId, title);
+      closeTaskForm();
+      toast.success({ message: 'Task updated' });
+    } catch (error) {
+      Alert.alert(
+        'Could not update task',
+        error instanceof Error ? error.message : 'Please try again.'
+      );
+    }
+  };
+
+  const handleDeleteTaskConfirm = async () => {
+    if (!taskToDelete) return;
+
+    try {
+      await deleteTask(taskToDelete.id);
+      setTaskToDelete(null);
+      toast.success({ message: 'Task deleted' });
+    } catch (error) {
+      Alert.alert(
+        'Could not delete task',
+        error instanceof Error ? error.message : 'Please try again.'
+      );
+    }
+  };
+
+  const handleTaskFormSubmit = (title: string) => {
+    if (taskForm?.mode === 'create') {
+      void handleCreateTask(title);
+      return;
+    }
+
+    if (taskForm?.mode === 'edit') {
+      void handleUpdateTask(title);
+    }
+  };
+
+  const handleEditTask = (id: string) => {
+    const task = tasks.find((item) => item.id === id);
+    if (!task) return;
+
+    setTaskForm({ mode: 'edit', taskId: id, initialTitle: task.title });
+  };
+
+  const handleDeleteTaskPress = (id: string) => {
+    const task = tasks.find((item) => item.id === id);
+    if (!task) return;
+
+    setTaskToDelete({ id, title: task.title });
+  };
 
   return (
     <SafeAreaView style={styles.safeContainer} edges={['top', 'left', 'right']}>
@@ -146,10 +228,14 @@ export default function HomeDashboardScreen() {
           ) : null}
           {showLists ? (
             <View style={styles.listsSection}>
-              <DashboardSection title="Today's tasks">
+              <DashboardSection
+                title="Today's tasks"
+                actionLabel="Add"
+                onActionPress={() => setTaskForm({ mode: 'create' })}
+              >
                 <Card style={styles.listCard} padded elevation="none">
                   {tasks.length === 0 ? (
-                    <Text style={styles.emptyText}>No tasks yet.</Text>
+                    <Text style={styles.emptyText}>No tasks yet. Tap Add to create one.</Text>
                   ) : (
                     tasks.map((task) => (
                       <TaskItem
@@ -158,6 +244,8 @@ export default function HomeDashboardScreen() {
                         title={task.title}
                         completed={task.completed}
                         onToggle={toggleTask}
+                        onEdit={handleEditTask}
+                        onDelete={handleDeleteTaskPress}
                       />
                     ))
                   )}
@@ -191,6 +279,28 @@ export default function HomeDashboardScreen() {
           ) : null}
         </View>
       </ScrollView>
+      <TaskFormModal
+        visible={taskForm !== null}
+        mode={taskForm?.mode ?? 'create'}
+        initialTitle={taskForm?.mode === 'edit' ? taskForm.initialTitle : ''}
+        loading={tasksSaving}
+        onClose={closeTaskForm}
+        onSubmit={handleTaskFormSubmit}
+      />
+      <ConfirmModal
+        visible={taskToDelete !== null}
+        title="Delete task?"
+        message={
+          taskToDelete
+            ? `"${taskToDelete.title}" will be removed from your list.`
+            : ''
+        }
+        confirmLabel="Delete"
+        destructive
+        loading={tasksSaving}
+        onCancel={() => setTaskToDelete(null)}
+        onConfirm={() => void handleDeleteTaskConfirm()}
+      />
     </SafeAreaView>
   );
 }
