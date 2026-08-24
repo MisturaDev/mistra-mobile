@@ -5,6 +5,7 @@ import Constants from 'expo-constants';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, Spacing, Typography } from '@/constants/theme';
 import { ConfirmModal } from '@/components/ConfirmModal';
+import { ChangePasswordModal } from '@/components/ChangePasswordModal';
 import { Avatar } from '@/components/Avatar';
 import { Card } from '@/components/Card';
 import { useAuth } from '@/providers/AuthProvider';
@@ -13,12 +14,20 @@ import { useNotificationStore } from '@/store/useNotificationStore';
 import { useProfileAvatar } from '@/hooks/useProfileAvatar';
 import { TabScreenHeader } from '@/components/TabScreenHeader';
 import { useTabScreenInsets } from '@/hooks/useTabBarStyle';
+import { EditProfileModal } from '@/components/EditProfileModal';
+import { updateProfileName } from '@/lib/profileStorage';
+import { changePassword } from '@/lib/authStorage';
+import { toast } from '@/components/AppToast';
 import { getUserNameFromSession } from '@/utils/userName';
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { session, signOut } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [editProfileVisible, setEditProfileVisible] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [changePasswordVisible, setChangePasswordVisible] = useState(false);
+  const [savingPassword, setSavingPassword] = useState(false);
   const [confirmModal, setConfirmModal] = useState<'signOut' | 'deleteAccount' | null>(null);
   const { pushEnabled, hydrate, isHydrated } = useNotificationStore();
   const { avatarUri, pickAvatar, removeAvatar } = useProfileAvatar(session?.user.id);
@@ -33,6 +42,7 @@ export default function ProfileScreen() {
     session?.user.email,
     'User'
   );
+  const profileName = (session?.user.user_metadata?.name as string | undefined)?.trim() ?? '';
 
   const userEmail = session?.user.email ?? '';
   const appVersion = Constants.expoConfig?.version ?? '1.0.0';
@@ -69,6 +79,40 @@ export default function ProfileScreen() {
 
   const showComingSoon = (feature: string) => {
     Alert.alert('Coming soon', `${feature} will be available in a future update.`);
+  };
+
+  const handleSaveProfile = async (name: string) => {
+    if (!session?.user.id) return;
+
+    setSavingProfile(true);
+    try {
+      await updateProfileName(session.user.id, name);
+      setEditProfileVisible(false);
+      toast.success({ message: 'Profile updated' });
+    } catch (error) {
+      Alert.alert(
+        'Could not update profile',
+        error instanceof Error ? error.message : 'Please try again.'
+      );
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
+  const handleChangePassword = async (currentPassword: string, newPassword: string) => {
+    setSavingPassword(true);
+    try {
+      await changePassword(currentPassword, newPassword);
+      setChangePasswordVisible(false);
+      toast.success({ message: 'Password updated' });
+    } catch (error) {
+      Alert.alert(
+        'Could not update password',
+        error instanceof Error ? error.message : 'Please try again.'
+      );
+    } finally {
+      setSavingPassword(false);
+    }
   };
 
   const handleAvatarPress = () => {
@@ -115,8 +159,8 @@ export default function ProfileScreen() {
           <ProfileMenuRow
             icon="person-outline"
             label="Edit profile"
-            value="Update your name and details"
-            onPress={() => showComingSoon('Edit profile')}
+            value="Update your name"
+            onPress={() => setEditProfileVisible(true)}
           />
           <View style={styles.divider} />
           <ProfileMenuRow
@@ -130,7 +174,7 @@ export default function ProfileScreen() {
             icon="lock-closed-outline"
             label="Change password"
             value="Update your account password"
-            onPress={() => showComingSoon('Change password')}
+            onPress={() => setChangePasswordVisible(true)}
           />
         </Card>
 
@@ -189,6 +233,23 @@ export default function ProfileScreen() {
           <Text style={styles.footerVersion}>Version {appVersion}</Text>
         </View>
       </ScrollView>
+
+      <EditProfileModal
+        visible={editProfileVisible}
+        initialName={profileName}
+        loading={savingProfile}
+        onClose={() => setEditProfileVisible(false)}
+        onSubmit={(name) => void handleSaveProfile(name)}
+      />
+
+      <ChangePasswordModal
+        visible={changePasswordVisible}
+        loading={savingPassword}
+        onClose={() => setChangePasswordVisible(false)}
+        onSubmit={(currentPassword, newPassword) =>
+          void handleChangePassword(currentPassword, newPassword)
+        }
+      />
 
       <ConfirmModal
         visible={confirmModal === 'signOut'}
