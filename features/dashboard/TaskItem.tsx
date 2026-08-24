@@ -8,6 +8,8 @@ export interface TaskItemProps {
   title: string;
   completed: boolean;
   onToggle: (id: string) => void;
+  onEdit: (id: string) => void;
+  onDelete: (id: string) => void;
 }
 
 export const TaskItem: React.FC<TaskItemProps> = ({
@@ -15,11 +17,11 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   title,
   completed,
   onToggle,
+  onEdit,
+  onDelete,
 }) => {
   return (
-    <TouchableOpacity
-      activeOpacity={0.7}
-      onPress={() => onToggle(id)}
+    <View
       style={[
         styles.container,
         {
@@ -28,32 +30,55 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         },
       ]}
     >
-      <View
-        style={[
-          styles.checkbox,
-          {
-            borderColor: completed ? Colors.primary : Colors.textLight,
-            backgroundColor: completed ? Colors.primary : 'transparent',
-          },
-        ]}
+      <TouchableOpacity
+        activeOpacity={0.7}
+        onPress={() => onToggle(id)}
+        style={styles.checkboxHitArea}
+        accessibilityRole="button"
+        accessibilityLabel={completed ? 'Mark task incomplete' : 'Mark task complete'}
       >
-        {completed && (
-          <Ionicons name="checkmark" size={14} color={Colors.white} />
-        )}
-      </View>
-      <Text
-        style={[
-          styles.title,
-          {
-            color: completed ? Colors.textSecondary : Colors.text,
-            textDecorationLine: completed ? 'line-through' : 'none',
-          },
-        ]}
-        numberOfLines={1}
+        <View
+          style={[
+            styles.checkbox,
+            {
+              borderColor: completed ? Colors.primary : Colors.textLight,
+              backgroundColor: completed ? Colors.primary : 'transparent',
+            },
+          ]}
+        >
+          {completed ? <Ionicons name="checkmark" size={14} color={Colors.white} /> : null}
+        </View>
+      </TouchableOpacity>
+      <TouchableOpacity
+        activeOpacity={0.7}
+        onPress={() => onEdit(id)}
+        style={styles.titleButton}
+        accessibilityRole="button"
+        accessibilityLabel={`Edit task ${title}`}
       >
-        {title}
-      </Text>
-    </TouchableOpacity>
+        <Text
+          style={[
+            styles.title,
+            {
+              color: completed ? Colors.textSecondary : Colors.text,
+              textDecorationLine: completed ? 'line-through' : 'none',
+            },
+          ]}
+          numberOfLines={2}
+        >
+          {title}
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        activeOpacity={0.7}
+        onPress={() => onDelete(id)}
+        style={styles.deleteButton}
+        accessibilityRole="button"
+        accessibilityLabel={`Delete task ${title}`}
+      >
+        <Ionicons name="trash-outline" size={18} color={Colors.textLight} />
+      </TouchableOpacity>
+    </View>
   );
 };
 
@@ -67,6 +92,9 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
     alignSelf: 'stretch',
   },
+  checkboxHitArea: {
+    marginRight: Spacing.md,
+  },
   checkbox: {
     width: 22,
     height: 22,
@@ -74,11 +102,17 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: Spacing.md,
+  },
+  titleButton: {
+    flex: 1,
+    minWidth: 0,
   },
   title: {
     ...Typography.body,
     fontWeight: '500',
-    flex: 1,
+  },
+  deleteButton: {
+    marginLeft: Spacing.sm,
+    padding: Spacing.xs,
   },
 });
