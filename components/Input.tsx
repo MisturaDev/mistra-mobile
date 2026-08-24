@@ -13,6 +13,7 @@ import { Colors, Spacing, Radius, Typography } from '@/constants/theme';
 
 export interface InputProps extends TextInputProps {
   label?: string;
+  hint?: string;
   error?: string;
   containerStyle?: ViewStyle;
   iconName?: keyof typeof Ionicons.glyphMap;
@@ -21,6 +22,7 @@ export interface InputProps extends TextInputProps {
 
 export const Input: React.FC<InputProps> = ({
   label,
+  hint,
   error,
   secureTextEntry,
   containerStyle,
@@ -96,6 +98,7 @@ export const Input: React.FC<InputProps> = ({
           </TouchableOpacity>
         )}
       </View>
+      {hint && !error ? <Text style={styles.hintText}>{hint}</Text> : null}
       {error && <Text style={styles.errorText}>{error}</Text>}
     </View>
   );
@@ -138,5 +141,11 @@ const styles = StyleSheet.create({
     ...Typography.caption,
     color: Colors.error,
     marginTop: Spacing.xs,
+  },
+  hintText: {
+    ...Typography.caption,
+    color: Colors.textSecondary,
+    marginTop: Spacing.xs,
+    lineHeight: 18,
   },
 });
