@@ -64,8 +64,8 @@ export default function OnboardingScreen() {
     handleFinish();
   };
 
-  const handleFinish = () => {
-    setOnboardingCompleted(true);
+  const handleFinish = async () => {
+    await setOnboardingCompleted(true);
     router.replace('/(auth)/welcome');
   };
 

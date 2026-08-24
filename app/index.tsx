@@ -10,6 +10,7 @@ import { Logo } from '@/components/Logo';
 export default function AppSplash() {
   const router = useRouter();
   const onboardingCompleted = useAppStore((state) => state.onboardingCompleted);
+  const isHydrated = useAppStore((state) => state.isHydrated);
   const { session, isLoading } = useAuth();
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -31,10 +32,12 @@ export default function AppSplash() {
         useNativeDriver: true,
       }),
     ]).start();
+  }, [fadeAnim, scaleAnim]);
+
+  useEffect(() => {
+    if (!isHydrated || isLoading) return;
 
     const timer = setTimeout(() => {
-      if (isLoading) return;
-
       if (session) {
         router.replace('/(tabs)');
       } else if (onboardingCompleted) {
@@ -45,7 +48,7 @@ export default function AppSplash() {
     }, 1800);
 
     return () => clearTimeout(timer);
-  }, [onboardingCompleted, session, isLoading]);
+  }, [onboardingCompleted, session, isLoading, isHydrated, router]);
 
   return (
     <View style={styles.container}>
