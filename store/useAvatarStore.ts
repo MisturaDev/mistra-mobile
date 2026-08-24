@@ -7,6 +7,7 @@ import {
   removeProfileAvatar,
   uploadProfileAvatar,
 } from '@/lib/avatarStorage';
+import { toast } from '@/components/AppToast';
 
 const cacheKey = (userId: string) => `mistra-avatar-${userId}`;
 
@@ -73,6 +74,7 @@ export const useAvatarStore = create<AvatarState>((set) => ({
       const publicUrl = await uploadProfileAvatar(userId, result.assets[0].uri);
       await AsyncStorage.setItem(cacheKey(userId), publicUrl);
       set({ avatarUri: publicUrl, isLoading: false, activeUserId: userId });
+      toast.success({ message: 'Profile photo updated.' });
     } catch (error) {
       set({ isLoading: false });
       Alert.alert(
@@ -89,6 +91,7 @@ export const useAvatarStore = create<AvatarState>((set) => ({
       await removeProfileAvatar(userId);
       await AsyncStorage.removeItem(cacheKey(userId));
       set({ avatarUri: null, isLoading: false, activeUserId: userId });
+      toast.info({ message: 'Profile photo removed.' });
     } catch (error) {
       set({ isLoading: false });
       Alert.alert(

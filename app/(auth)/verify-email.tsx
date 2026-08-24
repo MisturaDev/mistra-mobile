@@ -7,6 +7,7 @@ import { Colors, Spacing, Typography } from '@/constants/theme';
 import { Button } from '@/components/Button';
 import { Logo } from '@/components/Logo';
 import { OtpInput, OTP_CODE_LENGTH } from '@/components/OtpInput';
+import { toast } from '@/components/AppToast';
 import { supabase } from '@/lib/supabase';
 
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -81,7 +82,7 @@ export default function VerifyEmailScreen() {
     }
 
     setCooldown(RESEND_COOLDOWN_SECONDS);
-    Alert.alert('Code sent', 'Check your email for a new verification code.');
+    toast.info({ title: 'Code sent', message: 'Check your email for a new verification code.' });
   };
 
   return (
