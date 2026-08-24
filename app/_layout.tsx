@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
@@ -6,6 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/providers/AuthProvider';
 import { AppToast } from '@/components/AppToast';
+import { useAppStore } from '@/store/useAppStore';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -20,6 +21,12 @@ const queryClient = new QueryClient({
 });
 
 export default function RootLayout() {
+  const hydrate = useAppStore((state) => state.hydrate);
+
+  useEffect(() => {
+    void hydrate();
+  }, [hydrate]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
