@@ -9,6 +9,8 @@ export interface HabitItemProps {
   streak: number;
   completed: boolean;
   onToggle: (id: string) => void;
+  onEdit?: (id: string) => void;
+  onDelete?: (id: string) => void;
 }
 
 export const HabitItem: React.FC<HabitItemProps> = ({
@@ -17,42 +19,72 @@ export const HabitItem: React.FC<HabitItemProps> = ({
   streak,
   completed,
   onToggle,
+  onEdit,
+  onDelete,
 }) => {
+  const showActions = onEdit !== undefined || onDelete !== undefined;
+
   return (
     <View style={styles.container}>
-      <View style={styles.info}>
-        <Text style={styles.name}>{name}</Text>
+      <View style={[styles.info, showActions && styles.infoWithActions]}>
+        {onEdit ? (
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => onEdit(id)}
+            accessibilityRole="button"
+            accessibilityLabel={`Edit habit ${name}`}
+          >
+            <Text style={styles.name}>{name}</Text>
+          </TouchableOpacity>
+        ) : (
+          <Text style={styles.name}>{name}</Text>
+        )}
         <View style={styles.streakRow}>
           <Ionicons name="flame" size={16} color="#F59E0B" style={styles.flameIcon} />
           <Text style={styles.streakText}>{streak} day streak</Text>
         </View>
       </View>
-      <TouchableOpacity
-        activeOpacity={0.8}
-        onPress={() => onToggle(id)}
-        style={[
-          styles.actionBtn,
-          {
-            backgroundColor: completed ? Colors.successLight : Colors.primaryLight,
-          },
-        ]}
-      >
-        <Ionicons
-          name={completed ? 'checkmark-circle' : 'add'}
-          size={20}
-          color={completed ? Colors.success : Colors.primary}
-        />
-        <Text
+      <View style={styles.actions}>
+        {onDelete ? (
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => onDelete(id)}
+            style={styles.deleteButton}
+            accessibilityRole="button"
+            accessibilityLabel={`Delete habit ${name}`}
+          >
+            <Ionicons name="trash-outline" size={18} color={Colors.textLight} />
+          </TouchableOpacity>
+        ) : null}
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => onToggle(id)}
           style={[
-            styles.actionText,
+            styles.actionBtn,
             {
-              color: completed ? Colors.success : Colors.primary,
+              backgroundColor: completed ? Colors.successLight : Colors.primaryLight,
             },
           ]}
+          accessibilityRole="button"
+          accessibilityLabel={completed ? 'Undo habit log' : 'Log habit'}
         >
-          {completed ? 'Done' : 'Log'}
-        </Text>
-      </TouchableOpacity>
+          <Ionicons
+            name={completed ? 'checkmark-circle' : 'add'}
+            size={20}
+            color={completed ? Colors.success : Colors.primary}
+          />
+          <Text
+            style={[
+              styles.actionText,
+              {
+                color: completed ? Colors.success : Colors.primary,
+              },
+            ]}
+          >
+            {completed ? 'Done' : 'Log'}
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -73,6 +105,10 @@ const styles = StyleSheet.create({
   info: {
     flex: 1,
     marginRight: Spacing.md,
+    minWidth: 0,
+  },
+  infoWithActions: {
+    marginRight: Spacing.sm,
   },
   name: {
     ...Typography.bodyBold,
@@ -90,6 +126,14 @@ const styles = StyleSheet.create({
     ...Typography.caption,
     color: Colors.textSecondary,
     fontWeight: '500',
+  },
+  actions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  deleteButton: {
+    padding: Spacing.xs,
   },
   actionBtn: {
     flexDirection: 'row',

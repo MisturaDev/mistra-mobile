@@ -53,7 +53,8 @@ export function DashboardTabHeader({
       <View style={styles.headerRow}>
         <View style={styles.textWrap}>
           <Text style={styles.greetingText} numberOfLines={2}>
-            {greeting}, <Text style={styles.nameHighlight}>{firstName}</Text>
+            {`${greeting}, `}
+            <Text style={styles.nameHighlight}>{firstName}</Text>
           </Text>
           <Text style={styles.meta}>{date}</Text>
         </View>

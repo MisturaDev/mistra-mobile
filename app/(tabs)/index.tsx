@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Colors, Spacing, Typography } from '@/constants/theme';
@@ -8,28 +8,19 @@ import { DashboardTabHeader } from '@/components/TabScreenHeader';
 import { useTabScreenInsets } from '@/hooks/useTabBarStyle';
 import { useAuth } from '@/providers/AuthProvider';
 import { useProfileAvatar } from '@/hooks/useProfileAvatar';
+import { useTasks } from '@/hooks/useTasks';
+import { useHabits } from '@/hooks/useHabits';
 import { getFirstName, getUserNameFromSession } from '@/utils/userName';
 import { ProgressBar } from '@/components/ProgressBar';
 import { Card } from '@/components/Card';
 import { DashboardSection } from '@/features/dashboard/DashboardSection';
 import { TaskItem } from '@/features/dashboard/TaskItem';
 import { HabitItem } from '@/features/dashboard/HabitItem';
-
-interface Task {
-  id: string;
-  title: string;
-  completed: boolean;
-}
-
-interface Habit {
-  id: string;
-  name: string;
-  streak: number;
-  completed: boolean;
-}
+import { TaskFormModal } from '@/components/TaskFormModal';
+import { ConfirmModal } from '@/components/ConfirmModal';
+import { toast } from '@/components/AppToast';
 
 const HABIT_PREVIEW_LIMIT = 3;
-
 function getGreeting() {
   const hour = new Date().getHours();
   if (hour < 12) return 'Good morning';
@@ -64,22 +55,35 @@ export default function HomeDashboardScreen() {
     'Mistura'
   );
   const firstName = getFirstName(userName, 'Mistura');
+  const userId = session?.user.id;
 
-  const [tasks, setTasks] = useState<Task[]>([
-    { id: '1', title: "Review today's priorities", completed: true },
-    { id: '2', title: 'Finish project proposal', completed: true },
-    { id: '3', title: 'Reply to client emails', completed: false },
-    { id: '4', title: "Plan tomorrow's schedule", completed: false },
-    { id: '5', title: 'Pick up groceries', completed: false },
-  ]);
+  const [taskForm, setTaskForm] = useState<
+    { mode: 'create' } | { mode: 'edit'; taskId: string; initialTitle: string } | null
+  >(null);
+  const [taskToDelete, setTaskToDelete] = useState<{ id: string; title: string } | null>(null);
 
-  const [habits, setHabits] = useState<Habit[]>([
-    { id: '1', name: 'Meditate 10m', streak: 5, completed: true },
-    { id: '2', name: 'Read 15 pages', streak: 12, completed: true },
-    { id: '3', name: 'Workout 30m', streak: 3, completed: false },
-    { id: '4', name: 'Drink 2L water', streak: 8, completed: false },
-  ]);
+  const {
+    tasks,
+    isLoading: tasksLoading,
+    isError: tasksError,
+    isSaving: tasksSaving,
+    refetch: refetchTasks,
+    toggleTask,
+    createTask,
+    updateTask,
+    deleteTask,
+  } = useTasks(userId);
 
+  const {
+    habits,
+    isLoading: habitsLoading,
+    isError: habitsError,
+    refetch: refetchHabits,
+    toggleHabit,
+  } = useHabits(userId);
+
+  const isLoading = tasksLoading || habitsLoading;
+  const hasError = tasksError || habitsError;
   const completedTasks = tasks.filter((task) => task.completed).length;
   const completedHabits = habits.filter((habit) => habit.completed).length;
   const totalItems = tasks.length + habits.length;
@@ -89,27 +93,81 @@ export default function HomeDashboardScreen() {
 
   const visibleHabits = useMemo(() => habits.slice(0, HABIT_PREVIEW_LIMIT), [habits]);
 
-  const handleToggleTask = (id: string) => {
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id === id ? { ...task, completed: !task.completed } : task
-      )
-    );
+  const handleRetry = () => {
+    refetchTasks();
+    refetchHabits();
   };
 
-  const handleToggleHabit = (id: string) => {
-    setHabits((prevHabits) =>
-      prevHabits.map((habit) => {
-        if (habit.id !== id) return habit;
+  const showLists = !isLoading && !hasError;
 
-        const wasCompleted = habit.completed;
-        return {
-          ...habit,
-          completed: !wasCompleted,
-          streak: wasCompleted ? Math.max(0, habit.streak - 1) : habit.streak + 1,
-        };
-      })
-    );
+  const closeTaskForm = () => setTaskForm(null);
+
+  const handleCreateTask = async (title: string) => {
+    try {
+      await createTask(title);
+      closeTaskForm();
+      toast.success({ message: 'Task added' });
+    } catch (error) {
+      Alert.alert(
+        'Could not add task',
+        error instanceof Error ? error.message : 'Please try again.'
+      );
+    }
+  };
+
+  const handleUpdateTask = async (title: string) => {
+    if (!taskForm || taskForm.mode !== 'edit') return;
+
+    try {
+      await updateTask(taskForm.taskId, title);
+      closeTaskForm();
+      toast.success({ message: 'Task updated' });
+    } catch (error) {
+      Alert.alert(
+        'Could not update task',
+        error instanceof Error ? error.message : 'Please try again.'
+      );
+    }
+  };
+
+  const handleDeleteTaskConfirm = async () => {
+    if (!taskToDelete) return;
+
+    try {
+      await deleteTask(taskToDelete.id);
+      setTaskToDelete(null);
+      toast.success({ message: 'Task deleted' });
+    } catch (error) {
+      Alert.alert(
+        'Could not delete task',
+        error instanceof Error ? error.message : 'Please try again.'
+      );
+    }
+  };
+
+  const handleTaskFormSubmit = (title: string) => {
+    if (taskForm?.mode === 'create') {
+      void handleCreateTask(title);
+      return;
+    }
+
+    if (taskForm?.mode === 'edit') {
+      void handleUpdateTask(title);
+    }
+  };
+
+  const handleEditTask = (id: string) => {
+    const task = tasks.find((item) => item.id === id);
+    if (!task) return;
+
+    setTaskForm({ mode: 'edit', taskId: id, initialTitle: task.title });
+  };
+
+  const handleDeleteTaskPress = (id: string) => {
+    const task = tasks.find((item) => item.id === id);
+    if (!task) return;
+
+    setTaskToDelete({ id, title: task.title });
   };
 
   return (
@@ -118,75 +176,131 @@ export default function HomeDashboardScreen() {
         contentContainerStyle={[styles.scrollContainer, { paddingBottom: tabInsets.paddingBottom }]}
         showsVerticalScrollIndicator={false}
       >
-        <DashboardTabHeader
-          greeting={getGreeting()}
-          firstName={firstName}
-          date={getFormattedDate()}
-          right={
-            <Avatar
-              uri={avatarUri}
-              name={firstName}
-              size={48}
-              showRing
-              onPress={() => router.push('/(tabs)/profile')}
-            />
-          }
-        />
-
-        <Card style={styles.progressCard} padded elevation="md" bordered={false}>
-          <View style={styles.progressHeader}>
-            <View style={styles.progressCopy}>
-              <Text style={styles.progressTitle}>Today</Text>
-              <Text style={styles.progressSub}>{getProgressMessage(progressPercentage)}</Text>
-            </View>
-            <Text style={styles.progressPercent}>{progressPercentage}%</Text>
-          </View>
-
-          <ProgressBar
-            progress={progressRatio}
-            height={10}
-            backgroundColor={Colors.primaryMuted}
-            style={styles.progressBar}
+        <View style={styles.content}>
+          <DashboardTabHeader
+            greeting={getGreeting()}
+            firstName={firstName}
+            date={getFormattedDate()}
+            right={
+              <Avatar
+                uri={avatarUri}
+                name={firstName}
+                size={48}
+                showRing
+                onPress={() => router.push('/(tabs)/profile')}
+              />
+            }
           />
-
-          <Text style={styles.progressMeta}>
-            Tasks {completedTasks}/{tasks.length} · Habits {completedHabits}/{habits.length}
-          </Text>
-        </Card>
-
-        <DashboardSection title="Today's tasks">
-          <Card style={styles.listCard} padded elevation="none">
-            {tasks.map((task) => (
-              <TaskItem
-                key={task.id}
-                id={task.id}
-                title={task.title}
-                completed={task.completed}
-                onToggle={handleToggleTask}
+          <Card style={styles.progressCard} padded elevation="md" bordered={false}>
+            <View>
+              <View style={styles.progressHeader}>
+                <View style={styles.progressCopy}>
+                  <Text style={styles.progressTitle}>Today</Text>
+                  <Text style={styles.progressSub}>{getProgressMessage(progressPercentage)}</Text>
+                </View>
+                <Text style={styles.progressPercent}>{progressPercentage}%</Text>
+              </View>
+              <ProgressBar
+                progress={progressRatio}
+                height={10}
+                backgroundColor={Colors.primaryMuted}
+                style={styles.progressBar}
               />
-            ))}
+              <Text style={styles.progressMeta}>
+                Tasks {completedTasks}/{tasks.length} · Habits {completedHabits}/{habits.length}
+              </Text>
+            </View>
           </Card>
-        </DashboardSection>
-
-        <DashboardSection
-          title="Today's habits"
-          actionLabel="See all"
-          onActionPress={() => router.push('/(tabs)/habits')}
-        >
-          <View style={styles.habitsList}>
-            {visibleHabits.map((habit) => (
-              <HabitItem
-                key={habit.id}
-                id={habit.id}
-                name={habit.name}
-                streak={habit.streak}
-                completed={habit.completed}
-                onToggle={handleToggleHabit}
-              />
-            ))}
-          </View>
-        </DashboardSection>
+          {isLoading ? (
+            <View style={styles.stateContainer}>
+              <ActivityIndicator size="small" color={Colors.primary} />
+            </View>
+          ) : null}
+          {hasError ? (
+            <Card style={styles.stateCard} padded elevation="none">
+              <View style={styles.stateCardContent}>
+                <Text style={styles.stateText}>Could not load your dashboard.</Text>
+                <TouchableOpacity onPress={handleRetry} activeOpacity={0.7}>
+                  <Text style={styles.retryText}>Tap to retry</Text>
+                </TouchableOpacity>
+              </View>
+            </Card>
+          ) : null}
+          {showLists ? (
+            <View style={styles.listsSection}>
+              <DashboardSection
+                title="Today's tasks"
+                actionLabel="Add"
+                onActionPress={() => setTaskForm({ mode: 'create' })}
+              >
+                <Card style={styles.listCard} padded elevation="none">
+                  {tasks.length === 0 ? (
+                    <Text style={styles.emptyText}>No tasks yet. Tap Add to create one.</Text>
+                  ) : (
+                    tasks.map((task) => (
+                      <TaskItem
+                        key={task.id}
+                        id={task.id}
+                        title={task.title}
+                        completed={task.completed}
+                        onToggle={toggleTask}
+                        onEdit={handleEditTask}
+                        onDelete={handleDeleteTaskPress}
+                      />
+                    ))
+                  )}
+                </Card>
+              </DashboardSection>
+              <DashboardSection
+                title="Today's habits"
+                actionLabel="See all"
+                onActionPress={() => router.push('/(tabs)/habits')}
+              >
+                <View style={styles.habitsList}>
+                  {visibleHabits.length === 0 ? (
+                    <Card style={styles.listCard} padded elevation="none">
+                      <Text style={styles.emptyText}>No habits yet. Tap See all to add one.</Text>
+                    </Card>
+                  ) : (
+                    visibleHabits.map((habit) => (
+                      <HabitItem
+                        key={habit.id}
+                        id={habit.id}
+                        name={habit.name}
+                        streak={habit.streak}
+                        completed={habit.completed}
+                        onToggle={toggleHabit}
+                      />
+                    ))
+                  )}
+                </View>
+              </DashboardSection>
+            </View>
+          ) : null}
+        </View>
       </ScrollView>
+      <TaskFormModal
+        visible={taskForm !== null}
+        mode={taskForm?.mode ?? 'create'}
+        initialTitle={taskForm?.mode === 'edit' ? taskForm.initialTitle : ''}
+        loading={tasksSaving}
+        onClose={closeTaskForm}
+        onSubmit={handleTaskFormSubmit}
+      />
+      <ConfirmModal
+        visible={taskToDelete !== null}
+        title="Delete task?"
+        message={
+          taskToDelete
+            ? `"${taskToDelete.title}" will be removed from your list.`
+            : ''
+        }
+        confirmLabel="Delete"
+        destructive
+        loading={tasksSaving}
+        onCancel={() => setTaskToDelete(null)}
+        onConfirm={() => void handleDeleteTaskConfirm()}
+      />
     </SafeAreaView>
   );
 }
@@ -198,6 +312,12 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     paddingHorizontal: Spacing.xl,
+  },
+  content: {
+    gap: 0,
+  },
+  listsSection: {
+    gap: 0,
   },
   progressCard: {
     backgroundColor: Colors.primaryLight,
@@ -243,5 +363,32 @@ const styles = StyleSheet.create({
   },
   habitsList: {
     gap: 0,
+  },
+  stateContainer: {
+    alignItems: 'center',
+    paddingVertical: Spacing.lg,
+  },
+  stateCard: {
+    backgroundColor: Colors.surface,
+    marginBottom: Spacing.lg,
+  },
+  stateCardContent: {
+    alignItems: 'center',
+  },
+  stateText: {
+    ...Typography.body,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+  },
+  retryText: {
+    ...Typography.bodyBold,
+    color: Colors.primary,
+    marginTop: Spacing.sm,
+  },
+  emptyText: {
+    ...Typography.body,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    paddingVertical: Spacing.sm,
   },
 });
