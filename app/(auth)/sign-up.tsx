@@ -62,7 +62,7 @@ export default function SignUpScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
         <AuthHeader
-          title="Create account"
+          title="Sign up"
           subtitle="Get started with Mistra today."
           onBack={() => router.back()}
         />
@@ -149,7 +149,7 @@ export default function SignUpScreen() {
 
         <View style={styles.actionSection}>
           <Button
-            title="Create Account"
+            title="Sign Up"
             variant="primary"
             size="lg"
             loading={loading}
