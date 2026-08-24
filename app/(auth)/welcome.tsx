@@ -30,7 +30,7 @@ export default function WelcomeScreen() {
           style={styles.button}
         />
         <Button
-          title="Sign Up"
+          title="Create Account"
           variant="outline"
           size="lg"
           onPress={() => router.push('/(auth)/sign-up')}
