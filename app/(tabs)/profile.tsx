@@ -5,6 +5,7 @@ import Constants from 'expo-constants';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, Spacing, Typography } from '@/constants/theme';
 import { ConfirmModal } from '@/components/ConfirmModal';
+import { ChangePasswordModal } from '@/components/ChangePasswordModal';
 import { Avatar } from '@/components/Avatar';
 import { Card } from '@/components/Card';
 import { useAuth } from '@/providers/AuthProvider';
@@ -15,6 +16,7 @@ import { TabScreenHeader } from '@/components/TabScreenHeader';
 import { useTabScreenInsets } from '@/hooks/useTabBarStyle';
 import { EditProfileModal } from '@/components/EditProfileModal';
 import { updateProfileName } from '@/lib/profileStorage';
+import { changePassword } from '@/lib/authStorage';
 import { toast } from '@/components/AppToast';
 import { getUserNameFromSession } from '@/utils/userName';
 
@@ -24,6 +26,8 @@ export default function ProfileScreen() {
   const [loading, setLoading] = useState(false);
   const [editProfileVisible, setEditProfileVisible] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
+  const [changePasswordVisible, setChangePasswordVisible] = useState(false);
+  const [savingPassword, setSavingPassword] = useState(false);
   const [confirmModal, setConfirmModal] = useState<'signOut' | 'deleteAccount' | null>(null);
   const { pushEnabled, hydrate, isHydrated } = useNotificationStore();
   const { avatarUri, pickAvatar, removeAvatar } = useProfileAvatar(session?.user.id);
@@ -95,6 +99,22 @@ export default function ProfileScreen() {
     }
   };
 
+  const handleChangePassword = async (currentPassword: string, newPassword: string) => {
+    setSavingPassword(true);
+    try {
+      await changePassword(currentPassword, newPassword);
+      setChangePasswordVisible(false);
+      toast.success({ message: 'Password updated' });
+    } catch (error) {
+      Alert.alert(
+        'Could not update password',
+        error instanceof Error ? error.message : 'Please try again.'
+      );
+    } finally {
+      setSavingPassword(false);
+    }
+  };
+
   const handleAvatarPress = () => {
     if (avatarUri) {
       Alert.alert('Profile photo', undefined, [
@@ -154,7 +174,7 @@ export default function ProfileScreen() {
             icon="lock-closed-outline"
             label="Change password"
             value="Update your account password"
-            onPress={() => showComingSoon('Change password')}
+            onPress={() => setChangePasswordVisible(true)}
           />
         </Card>
 
@@ -220,6 +240,15 @@ export default function ProfileScreen() {
         loading={savingProfile}
         onClose={() => setEditProfileVisible(false)}
         onSubmit={(name) => void handleSaveProfile(name)}
+      />
+
+      <ChangePasswordModal
+        visible={changePasswordVisible}
+        loading={savingPassword}
+        onClose={() => setChangePasswordVisible(false)}
+        onSubmit={(currentPassword, newPassword) =>
+          void handleChangePassword(currentPassword, newPassword)
+        }
       />
 
       <ConfirmModal
