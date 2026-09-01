@@ -151,16 +151,6 @@ export default function NotesScreen() {
       >
         <TabScreenHeader title="Notes" subtitle="Your personal knowledge base" />
 
-        <View style={styles.topActionsRow}>
-          <Button
-            title="Add note"
-            variant="primary"
-            size="md"
-            onPress={() => setNoteForm({ mode: 'create' })}
-            style={styles.addButton}
-          />
-        </View>
-
         {notes.length > 0 ? (
           <View style={styles.searchContainer}>
             <Ionicons name="search-outline" size={18} color={Colors.textLight} style={styles.searchIcon} />
@@ -184,6 +174,16 @@ export default function NotesScreen() {
             ) : null}
           </View>
         ) : null}
+
+        <View style={styles.topActionsRow}>
+          <Button
+            title="Add note"
+            variant="primary"
+            size="md"
+            onPress={() => setNoteForm({ mode: 'create' })}
+            style={styles.addButton}
+          />
+        </View>
 
         {isLoading ? (
           <View style={styles.stateContainer}>
@@ -311,12 +311,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: Spacing.xl,
   },
-  topActionsRow: {
-    marginBottom: Spacing.md,
-  },
-  addButton: {
-    width: '100%',
-  },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -325,8 +319,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     borderWidth: 1,
     borderColor: Colors.borderLight,
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.md,
     height: 44,
+  },
+  topActionsRow: {
+    marginBottom: Spacing.lg,
+  },
+  addButton: {
+    width: '100%',
   },
   searchIcon: {
     marginRight: Spacing.xs,
