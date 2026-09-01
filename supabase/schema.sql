@@ -43,10 +43,14 @@ create table if not exists public.tasks (
   id uuid default gen_random_uuid() primary key,
   user_id uuid references auth.users on delete cascade not null,
   title text not null,
-  completed boolean default false not null,
+  description text default '',
+  category text default 'general' not null,
   priority text default 'medium' not null,
-  due_date timestamptz,
-  created_at timestamptz default now() not null
+  due_date text,
+  subtasks jsonb default '[]'::jsonb not null,
+  completed boolean default false not null,
+  created_at timestamptz default now() not null,
+  updated_at timestamptz default now() not null
 );
 
 alter table public.tasks enable row level security;
