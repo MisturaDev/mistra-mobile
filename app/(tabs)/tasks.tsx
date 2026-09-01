@@ -21,7 +21,7 @@ import { ConfirmModal } from '@/components/ConfirmModal';
 import { toast } from '@/components/AppToast';
 import { Button } from '@/components/Button';
 import { Ionicons } from '@expo/vector-icons';
-import type { Task, TaskCategory } from '@/types/dashboard';
+import type { Task } from '@/types/dashboard';
 
 type TaskSegment = 'all' | 'today' | 'upcoming' | 'completed';
 
@@ -32,23 +32,12 @@ const SEGMENTS: { key: TaskSegment; label: string }[] = [
   { key: 'completed', label: 'Completed' },
 ];
 
-const CATEGORIES: { key: 'all' | TaskCategory; label: string; icon: string }[] = [
-  { key: 'all', label: 'All', icon: '✨' },
-  { key: 'work', label: 'Work', icon: '💼' },
-  { key: 'personal', label: 'Personal', icon: '🏠' },
-  { key: 'study', label: 'Study', icon: '📚' },
-  { key: 'health', label: 'Health', icon: '💪' },
-  { key: 'shopping', label: 'Shopping', icon: '🛒' },
-  { key: 'general', label: 'General', icon: '🏷️' },
-];
-
 export default function TasksScreen() {
   const tabInsets = useTabScreenInsets();
   const { session } = useAuth();
   const userId = session?.user.id;
 
   const [activeSegment, setActiveSegment] = useState<TaskSegment>('all');
-  const [activeCategory, setActiveCategory] = useState<'all' | TaskCategory>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
   const [taskForm, setTaskForm] = useState<
@@ -71,7 +60,7 @@ export default function TasksScreen() {
 
   const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
 
-  // Filter tasks based on segment, category, and search query
+  // Filter tasks based on segment and search query
   const filteredTasks = useMemo(() => {
     return tasks.filter((task) => {
       // 1. Segment filtering
@@ -87,12 +76,7 @@ export default function TasksScreen() {
         }
       }
 
-      // 2. Category filtering
-      if (activeCategory !== 'all' && task.category !== activeCategory) {
-        return false;
-      }
-
-      // 3. Search query filtering
+      // 2. Search query filtering
       if (searchQuery.trim()) {
         const q = searchQuery.trim().toLowerCase();
         const matchesTitle = task.title.toLowerCase().includes(q);
@@ -105,7 +89,7 @@ export default function TasksScreen() {
 
       return true;
     });
-  }, [tasks, activeSegment, activeCategory, searchQuery, todayStr]);
+  }, [tasks, activeSegment, searchQuery, todayStr]);
 
   // Counts for segments
   const segmentCounts = useMemo(() => {
@@ -239,7 +223,11 @@ export default function TasksScreen() {
         </View>
 
         {/* Segment Filter Tabs */}
-        <View style={styles.segmentContainer}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.segmentScroll}
+        >
           {SEGMENTS.map((seg) => {
             const isSelected = activeSegment === seg.key;
             const count = segmentCounts[seg.key];
@@ -260,30 +248,6 @@ export default function TasksScreen() {
                     </Text>
                   </View>
                 ) : null}
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-
-        {/* Category Filter Chips */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.categoryScroll}
-        >
-          {CATEGORIES.map((cat) => {
-            const isSelected = activeCategory === cat.key;
-            return (
-              <TouchableOpacity
-                key={cat.key}
-                onPress={() => setActiveCategory(cat.key)}
-                style={[styles.categoryChip, isSelected && styles.categoryChipActive]}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.categoryIcon}>{cat.icon}</Text>
-                <Text style={[styles.categoryChipLabel, isSelected && styles.categoryChipLabelActive]}>
-                  {cat.label}
-                </Text>
               </TouchableOpacity>
             );
           })}
@@ -336,13 +300,12 @@ export default function TasksScreen() {
                   ? 'No upcoming tasks scheduled.'
                   : activeSegment === 'completed'
                   ? 'No completed tasks yet.'
-                  : 'No tasks found in this category.'}
+                  : 'No tasks found.'}
               </Text>
-              {(activeCategory !== 'all' || searchQuery || activeSegment !== 'all') ? (
+              {(searchQuery || activeSegment !== 'all') ? (
                 <TouchableOpacity
                   onPress={() => {
                     setActiveSegment('all');
-                    setActiveCategory('all');
                     setSearchQuery('');
                   }}
                   activeOpacity={0.7}
@@ -439,49 +402,45 @@ const styles = StyleSheet.create({
   addButton: {
     width: '100%',
   },
-  segmentContainer: {
+  segmentScroll: {
     flexDirection: 'row',
-    backgroundColor: Colors.surface,
-    borderRadius: Radius.lg,
-    padding: 3,
-    marginBottom: Spacing.sm,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
+    gap: Spacing.xs,
+    paddingVertical: 2,
+    marginBottom: Spacing.md,
   },
   segmentTab: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: Spacing.xs,
-    borderRadius: Radius.md,
-    gap: 4,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 8,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    gap: 6,
   },
   segmentTabActive: {
-    backgroundColor: Colors.white,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    shadowOffset: { width: 0, height: 1 },
+    backgroundColor: Colors.primaryLight,
+    borderColor: Colors.primary,
   },
   segmentLabel: {
     ...Typography.caption,
     fontWeight: '600',
     color: Colors.textSecondary,
+    fontSize: 12,
   },
   segmentLabelActive: {
     color: Colors.primary,
     fontWeight: '700',
   },
   segmentCountBadge: {
-    backgroundColor: Colors.borderLight,
-    paddingHorizontal: 5,
-    paddingVertical: 1,
+    backgroundColor: Colors.border,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
     borderRadius: Radius.full,
   },
   segmentCountBadgeActive: {
-    backgroundColor: Colors.primaryLight,
+    backgroundColor: Colors.primary,
   },
   segmentCountText: {
     fontSize: 10,
@@ -489,40 +448,7 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   },
   segmentCountTextActive: {
-    color: Colors.primary,
-  },
-  categoryScroll: {
-    flexDirection: 'row',
-    gap: Spacing.xs,
-    paddingVertical: Spacing.xs,
-    marginBottom: Spacing.md,
-  },
-  categoryChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: 6,
-    borderRadius: Radius.full,
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
-  },
-  categoryChipActive: {
-    backgroundColor: Colors.primaryLight,
-    borderColor: Colors.primary,
-  },
-  categoryIcon: {
-    fontSize: 12,
-  },
-  categoryChipLabel: {
-    ...Typography.caption,
-    fontWeight: '600',
-    color: Colors.textSecondary,
-  },
-  categoryChipLabelActive: {
-    color: Colors.primary,
-    fontWeight: '700',
+    color: Colors.white,
   },
   tasksList: {
     gap: 0,
