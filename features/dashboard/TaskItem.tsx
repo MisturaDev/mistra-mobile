@@ -2,24 +2,35 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Colors, Spacing, Radius, Typography } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import type { TaskPriority } from '@/types/dashboard';
 
 export interface TaskItemProps {
   id: string;
   title: string;
   completed: boolean;
+  priority?: TaskPriority;
   onToggle: (id: string) => void;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
 }
 
+const PRIORITY_BADGES: Record<TaskPriority, { label: string; bg: string; text: string } | null> = {
+  high: { label: 'High', bg: '#FEE2E2', text: '#DC2626' },
+  medium: null, // neutral / subtle
+  low: { label: 'Low', bg: '#F3F4F6', text: '#6B7280' },
+};
+
 export const TaskItem: React.FC<TaskItemProps> = ({
   id,
   title,
   completed,
+  priority = 'medium',
   onToggle,
   onEdit,
   onDelete,
 }) => {
+  const badge = PRIORITY_BADGES[priority];
+
   return (
     <View
       style={[
@@ -49,6 +60,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
           {completed ? <Ionicons name="checkmark" size={14} color={Colors.white} /> : null}
         </View>
       </TouchableOpacity>
+
       <TouchableOpacity
         activeOpacity={0.7}
         onPress={() => onEdit(id)}
@@ -56,19 +68,30 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         accessibilityRole="button"
         accessibilityLabel={`Edit task ${title}`}
       >
-        <Text
-          style={[
-            styles.title,
-            {
-              color: completed ? Colors.textSecondary : Colors.text,
-              textDecorationLine: completed ? 'line-through' : 'none',
-            },
-          ]}
-          numberOfLines={2}
-        >
-          {title}
-        </Text>
+        <View style={styles.titleRow}>
+          <Text
+            style={[
+              styles.title,
+              {
+                color: completed ? Colors.textSecondary : Colors.text,
+                textDecorationLine: completed ? 'line-through' : 'none',
+              },
+            ]}
+            numberOfLines={2}
+          >
+            {title}
+          </Text>
+
+          {badge && !completed ? (
+            <View style={[styles.priorityBadge, { backgroundColor: badge.bg }]}>
+              <Text style={[styles.priorityBadgeText, { color: badge.text }]}>
+                {badge.label}
+              </Text>
+            </View>
+          ) : null}
+        </View>
       </TouchableOpacity>
+
       <TouchableOpacity
         activeOpacity={0.7}
         onPress={() => onDelete(id)}
@@ -107,9 +130,24 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 0,
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    flexWrap: 'wrap',
+  },
   title: {
     ...Typography.body,
     fontWeight: '500',
+  },
+  priorityBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: Radius.full,
+  },
+  priorityBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
   },
   deleteButton: {
     marginLeft: Spacing.sm,
