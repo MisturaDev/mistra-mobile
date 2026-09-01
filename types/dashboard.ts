@@ -23,3 +23,25 @@ export interface HabitRow {
   streak: number;
   completed_today: boolean;
 }
+
+export interface Note {
+  id: string;
+  title: string;
+  content: string;
+  emoji: string;
+  isPinned: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface NoteRow {
+  id: string;
+  user_id: string;
+  title: string;
+  content: string;
+  emoji: string;
+  is_pinned: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
