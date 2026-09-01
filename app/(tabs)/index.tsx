@@ -10,17 +10,22 @@ import { useAuth } from '@/providers/AuthProvider';
 import { useProfileAvatar } from '@/hooks/useProfileAvatar';
 import { useTasks } from '@/hooks/useTasks';
 import { useHabits } from '@/hooks/useHabits';
+import { useNotes } from '@/hooks/useNotes';
 import { getFirstName, getUserNameFromSession } from '@/utils/userName';
 import { ProgressBar } from '@/components/ProgressBar';
 import { Card } from '@/components/Card';
 import { DashboardSection } from '@/features/dashboard/DashboardSection';
 import { TaskItem } from '@/features/dashboard/TaskItem';
 import { HabitItem } from '@/features/dashboard/HabitItem';
+import { NoteItem } from '@/features/dashboard/NoteItem';
 import { TaskFormModal } from '@/components/TaskFormModal';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { toast } from '@/components/AppToast';
+import type { TaskPriority } from '@/types/dashboard';
 
 const HABIT_PREVIEW_LIMIT = 3;
+const NOTE_PREVIEW_LIMIT = 2;
+
 function getGreeting() {
   const hour = new Date().getHours();
   if (hour < 12) return 'Good morning';
@@ -34,6 +39,22 @@ function getFormattedDate() {
     month: 'short',
     day: 'numeric',
   });
+}
+
+function formatRelativeTime(dateString: string) {
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+    const now = new Date();
+    const diffHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    if (diffHours < 1) return 'Just now';
+    if (diffHours < 24 && now.getDate() === date.getDate()) {
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  } catch {
+    return '';
+  }
 }
 
 function getProgressMessage(percentage: number) {
@@ -58,7 +79,9 @@ export default function HomeDashboardScreen() {
   const userId = session?.user.id;
 
   const [taskForm, setTaskForm] = useState<
-    { mode: 'create' } | { mode: 'edit'; taskId: string; initialTitle: string } | null
+    | { mode: 'create' }
+    | { mode: 'edit'; taskId: string; initialTitle: string; initialPriority?: TaskPriority }
+    | null
   >(null);
   const [taskToDelete, setTaskToDelete] = useState<{ id: string; title: string } | null>(null);
 
@@ -82,8 +105,15 @@ export default function HomeDashboardScreen() {
     toggleHabit,
   } = useHabits(userId);
 
-  const isLoading = tasksLoading || habitsLoading;
-  const hasError = tasksError || habitsError;
+  const {
+    notes,
+    isLoading: notesLoading,
+    isError: notesError,
+    refetch: refetchNotes,
+  } = useNotes(userId);
+
+  const isLoading = tasksLoading || habitsLoading || notesLoading;
+  const hasError = tasksError || habitsError || notesError;
   const completedTasks = tasks.filter((task) => task.completed).length;
   const completedHabits = habits.filter((habit) => habit.completed).length;
   const totalItems = tasks.length + habits.length;
@@ -92,19 +122,21 @@ export default function HomeDashboardScreen() {
   const progressPercentage = Math.round(progressRatio * 100);
 
   const visibleHabits = useMemo(() => habits.slice(0, HABIT_PREVIEW_LIMIT), [habits]);
+  const visibleNotes = useMemo(() => notes.slice(0, NOTE_PREVIEW_LIMIT), [notes]);
 
   const handleRetry = () => {
     refetchTasks();
     refetchHabits();
+    refetchNotes();
   };
 
   const showLists = !isLoading && !hasError;
 
   const closeTaskForm = () => setTaskForm(null);
 
-  const handleCreateTask = async (title: string) => {
+  const handleCreateTask = async (data: { title: string; priority: TaskPriority }) => {
     try {
-      await createTask(title);
+      await createTask({ title: data.title, priority: data.priority });
       closeTaskForm();
       toast.success({ message: 'Task added' });
     } catch (error) {
@@ -115,11 +147,11 @@ export default function HomeDashboardScreen() {
     }
   };
 
-  const handleUpdateTask = async (title: string) => {
+  const handleUpdateTask = async (data: { title: string; priority: TaskPriority }) => {
     if (!taskForm || taskForm.mode !== 'edit') return;
 
     try {
-      await updateTask(taskForm.taskId, title);
+      await updateTask(taskForm.taskId, data.title, data.priority);
       closeTaskForm();
       toast.success({ message: 'Task updated' });
     } catch (error) {
@@ -145,14 +177,14 @@ export default function HomeDashboardScreen() {
     }
   };
 
-  const handleTaskFormSubmit = (title: string) => {
+  const handleTaskFormSubmit = (data: { title: string; priority: TaskPriority }) => {
     if (taskForm?.mode === 'create') {
-      void handleCreateTask(title);
+      void handleCreateTask(data);
       return;
     }
 
     if (taskForm?.mode === 'edit') {
-      void handleUpdateTask(title);
+      void handleUpdateTask(data);
     }
   };
 
@@ -160,7 +192,12 @@ export default function HomeDashboardScreen() {
     const task = tasks.find((item) => item.id === id);
     if (!task) return;
 
-    setTaskForm({ mode: 'edit', taskId: id, initialTitle: task.title });
+    setTaskForm({
+      mode: 'edit',
+      taskId: id,
+      initialTitle: task.title,
+      initialPriority: task.priority,
+    });
   };
 
   const handleDeleteTaskPress = (id: string) => {
@@ -243,6 +280,7 @@ export default function HomeDashboardScreen() {
                         id={task.id}
                         title={task.title}
                         completed={task.completed}
+                        priority={task.priority}
                         onToggle={toggleTask}
                         onEdit={handleEditTask}
                         onDelete={handleDeleteTaskPress}
@@ -251,6 +289,7 @@ export default function HomeDashboardScreen() {
                   )}
                 </Card>
               </DashboardSection>
+
               <DashboardSection
                 title="Today's habits"
                 actionLabel="See all"
@@ -275,6 +314,32 @@ export default function HomeDashboardScreen() {
                   )}
                 </View>
               </DashboardSection>
+
+              <DashboardSection
+                title="Recent notes"
+                actionLabel="See all"
+                onActionPress={() => router.push('/(tabs)/notes')}
+              >
+                <View style={styles.notesList}>
+                  {visibleNotes.length === 0 ? (
+                    <Card style={styles.listCard} padded elevation="none">
+                      <Text style={styles.emptyText}>No notes yet. Tap See all to add one.</Text>
+                    </Card>
+                  ) : (
+                    visibleNotes.map((note) => (
+                      <NoteItem
+                        key={note.id}
+                        id={note.id}
+                        title={note.title}
+                        snippet={note.content}
+                        emoji={note.emoji}
+                        updatedAt={formatRelativeTime(note.updatedAt || note.createdAt)}
+                        onPress={() => router.push('/(tabs)/notes')}
+                      />
+                    ))
+                  )}
+                </View>
+              </DashboardSection>
             </View>
           ) : null}
         </View>
@@ -283,6 +348,7 @@ export default function HomeDashboardScreen() {
         visible={taskForm !== null}
         mode={taskForm?.mode ?? 'create'}
         initialTitle={taskForm?.mode === 'edit' ? taskForm.initialTitle : ''}
+        initialPriority={taskForm?.mode === 'edit' ? taskForm.initialPriority : 'medium'}
         loading={tasksSaving}
         onClose={closeTaskForm}
         onSubmit={handleTaskFormSubmit}
@@ -362,6 +428,9 @@ const styles = StyleSheet.create({
     borderWidth: 0,
   },
   habitsList: {
+    gap: 0,
+  },
+  notesList: {
     gap: 0,
   },
   stateContainer: {
