@@ -1,7 +1,11 @@
+export type TaskPriority = 'low' | 'medium' | 'high';
+
 export interface Task {
   id: string;
   title: string;
   completed: boolean;
+  priority?: TaskPriority;
+  dueDate?: string | null;
 }
 
 export interface Habit {
@@ -15,6 +19,8 @@ export interface TaskRow {
   id: string;
   title: string;
   completed: boolean;
+  priority?: TaskPriority;
+  due_date?: string | null;
 }
 
 export interface HabitRow {

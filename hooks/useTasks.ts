@@ -1,19 +1,34 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import type { Task, TaskRow } from '@/types/dashboard';
+import type { Task, TaskPriority, TaskRow } from '@/types/dashboard';
+
+export interface CreateTaskInput {
+  title: string;
+  priority?: TaskPriority;
+  dueDate?: string | null;
+}
+
+export interface UpdateTaskInput {
+  id: string;
+  title: string;
+  priority?: TaskPriority;
+  dueDate?: string | null;
+}
 
 function mapTask(row: TaskRow): Task {
   return {
     id: row.id,
     title: row.title,
     completed: row.completed,
+    priority: row.priority || 'medium',
+    dueDate: row.due_date ?? null,
   };
 }
 
 async function fetchTasks(userId: string): Promise<Task[]> {
   const { data, error } = await supabase
     .from('tasks')
-    .select('id, title, completed')
+    .select('id, title, completed, priority, due_date')
     .eq('user_id', userId)
     .order('created_at', { ascending: true });
 
@@ -55,13 +70,17 @@ export function useTasks(userId: string | undefined) {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (title: string) => {
+    mutationFn: async (input: string | CreateTaskInput) => {
       if (!userId) throw new Error('You must be signed in to add tasks.');
+
+      const title = typeof input === 'string' ? input : input.title;
+      const priority = typeof input === 'string' ? 'medium' : input.priority || 'medium';
+      const dueDate = typeof input === 'string' ? null : input.dueDate ?? null;
 
       const { data, error } = await supabase
         .from('tasks')
-        .insert({ user_id: userId, title })
-        .select('id, title, completed')
+        .insert({ user_id: userId, title, priority, due_date: dueDate })
+        .select('id, title, completed, priority, due_date')
         .single();
 
       if (error) throw error;
@@ -76,15 +95,29 @@ export function useTasks(userId: string | undefined) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, title }: { id: string; title: string }) => {
-      const { error } = await supabase.from('tasks').update({ title }).eq('id', id);
+    mutationFn: async (input: { id: string; title: string; priority?: TaskPriority; dueDate?: string | null }) => {
+      const { id, title, priority, dueDate } = input;
+      const updates: Partial<TaskRow> = { title };
+      if (priority) updates.priority = priority;
+      if (dueDate !== undefined) updates.due_date = dueDate;
+
+      const { error } = await supabase.from('tasks').update(updates).eq('id', id);
       if (error) throw error;
     },
-    onMutate: async ({ id, title }) => {
+    onMutate: async ({ id, title, priority, dueDate }) => {
       await queryClient.cancelQueries({ queryKey });
       const previous = queryClient.getQueryData<Task[]>(queryKey);
       queryClient.setQueryData<Task[]>(queryKey, (current) =>
-        current?.map((task) => (task.id === id ? { ...task, title } : task)) ?? []
+        current?.map((task) =>
+          task.id === id
+            ? {
+                ...task,
+                title,
+                priority: priority || task.priority,
+                dueDate: dueDate !== undefined ? dueDate : task.dueDate,
+              }
+            : task
+        ) ?? []
       );
       return { previous };
     },
@@ -128,8 +161,9 @@ export function useTasks(userId: string | undefined) {
     toggleMutation.mutate({ id, completed: !task.completed });
   };
 
-  const createTask = (title: string) => createMutation.mutateAsync(title);
-  const updateTask = (id: string, title: string) => updateMutation.mutateAsync({ id, title });
+  const createTask = (input: string | CreateTaskInput) => createMutation.mutateAsync(input);
+  const updateTask = (id: string, title: string, priority?: TaskPriority) =>
+    updateMutation.mutateAsync({ id, title, priority });
   const deleteTask = (id: string) => deleteMutation.mutateAsync(id);
 
   return {
