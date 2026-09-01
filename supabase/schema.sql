@@ -44,6 +44,8 @@ create table if not exists public.tasks (
   user_id uuid references auth.users on delete cascade not null,
   title text not null,
   completed boolean default false not null,
+  priority text default 'medium' not null,
+  due_date timestamptz,
   created_at timestamptz default now() not null
 );
 
