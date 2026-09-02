@@ -2,7 +2,8 @@ import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Colors, Spacing, Typography } from '@/constants/theme';
+import { Colors, Spacing, Radius, Typography } from '@/constants/theme';
+import { Ionicons } from '@expo/vector-icons';
 import { Avatar } from '@/components/Avatar';
 import { DashboardTabHeader } from '@/components/TabScreenHeader';
 import { useTabScreenInsets } from '@/hooks/useTabBarStyle';
@@ -234,13 +235,23 @@ export default function HomeDashboardScreen() {
             firstName={firstName}
             date={getFormattedDate()}
             right={
-              <Avatar
-                uri={avatarUri}
-                name={firstName}
-                size={48}
-                showRing
-                onPress={() => router.push('/(tabs)/profile')}
-              />
+              <View style={styles.headerRightRow}>
+                <TouchableOpacity
+                  onPress={() => router.push('/calendar' as any)}
+                  style={styles.calendarHeaderButton}
+                  activeOpacity={0.7}
+                  accessibilityLabel="Open Calendar"
+                >
+                  <Ionicons name="calendar-outline" size={20} color={Colors.primary} />
+                </TouchableOpacity>
+                <Avatar
+                  uri={avatarUri}
+                  name={firstName}
+                  size={44}
+                  showRing
+                  onPress={() => router.push('/(tabs)/profile')}
+                />
+              </View>
             }
           />
           <Card style={styles.progressCard} padded elevation="md" bordered={false}>
@@ -478,5 +489,20 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     textAlign: 'center',
     paddingVertical: Spacing.sm,
+  },
+  headerRightRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  calendarHeaderButton: {
+    width: 44,
+    height: 44,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
   },
 });
