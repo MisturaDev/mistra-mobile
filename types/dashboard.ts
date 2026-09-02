@@ -76,3 +76,45 @@ export interface NoteRow {
   updated_at: string;
 }
 
+export type EventCategory =
+  | 'general'
+  | 'work'
+  | 'personal'
+  | 'meeting'
+  | 'health'
+  | 'study';
+
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  description?: string;
+  eventDate: string; // YYYY-MM-DD
+  startTime?: string | null;
+  endTime?: string | null;
+  category: EventCategory;
+  color: string;
+  isAllDay: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CalendarEventRow {
+  id: string;
+  user_id?: string;
+  title: string;
+  description?: string | null;
+  event_date: string;
+  start_time?: string | null;
+  end_time?: string | null;
+  category?: EventCategory | null;
+  color?: string | null;
+  is_all_day?: boolean | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export type DayScheduleItem =
+  | { type: 'event'; item: CalendarEvent }
+  | { type: 'task'; item: Task };
+
+
