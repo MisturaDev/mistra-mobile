@@ -59,8 +59,6 @@ export default function VerifyEmailScreen() {
       setError(verifyError.message);
       return;
     }
-
-    router.replace('/(tabs)');
   };
 
   const handleResend = async () => {

@@ -62,8 +62,6 @@ export default function SignInScreen() {
       Alert.alert('Sign in failed', error.message);
       return;
     }
-
-    router.replace('/(tabs)');
   };
 
   return (

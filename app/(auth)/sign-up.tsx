@@ -48,7 +48,6 @@ export default function SignUpScreen() {
     }
 
     if (authData.session) {
-      router.replace('/(tabs)');
       return;
     }
 
