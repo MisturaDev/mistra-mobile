@@ -237,12 +237,12 @@ export default function HomeDashboardScreen() {
             right={
               <View style={styles.headerRightRow}>
                 <TouchableOpacity
-                  onPress={() => router.push('/calendar' as any)}
+                  onPress={() => router.push('/notifications')}
                   style={styles.calendarHeaderButton}
                   activeOpacity={0.7}
-                  accessibilityLabel="Open Calendar"
+                  accessibilityLabel="Open Notifications"
                 >
-                  <Ionicons name="calendar-outline" size={20} color={Colors.primary} />
+                  <Ionicons name="notifications-outline" size={20} color={Colors.primary} />
                 </TouchableOpacity>
                 <Avatar
                   uri={avatarUri}

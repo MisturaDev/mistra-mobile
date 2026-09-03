@@ -9,11 +9,12 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
 import { Colors, Spacing, Radius, Typography } from '@/constants/theme';
 import { useAuth } from '@/providers/AuthProvider';
 import { useEvents } from '@/hooks/useEvents';
 import { useTasks } from '@/hooks/useTasks';
+import { useTabScreenInsets } from '@/hooks/useTabBarStyle';
+import { TabScreenHeader } from '@/components/TabScreenHeader';
 import { MonthGrid } from '@/components/Calendar/MonthGrid';
 import { WeekStrip } from '@/components/Calendar/WeekStrip';
 import { AgendaEventCard, AgendaTaskCard } from '@/features/calendar/AgendaItem';
@@ -40,8 +41,8 @@ const MONTH_NAMES = [
   'December',
 ];
 
-export default function CalendarScreen() {
-  const router = useRouter();
+export default function CalendarTabScreen() {
+  const tabInsets = useTabScreenInsets();
   const { session } = useAuth();
   const userId = session?.user.id;
 
@@ -233,35 +234,24 @@ export default function CalendarScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-      {/* Top Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.backButton}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="chevron-back" size={24} color={Colors.text} />
-        </TouchableOpacity>
-
-        <View style={styles.headerTitleContainer}>
-          <Text style={styles.headerTitle}>Calendar</Text>
-          <Text style={styles.headerSubtitle}>Plan & schedule your timeline</Text>
-        </View>
-
-        <TouchableOpacity
-          onPress={handleJumpToToday}
-          style={styles.todayPill}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.todayPillText}>Today</Text>
-        </TouchableOpacity>
-      </View>
-
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: tabInsets.paddingBottom }]}
       >
+        <TabScreenHeader
+          title="Calendar"
+          subtitle="Plan & schedule your timeline"
+          right={
+            <TouchableOpacity
+              onPress={handleJumpToToday}
+              style={styles.todayPill}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.todayPillText}>Today</Text>
+            </TouchableOpacity>
+          }
+        />
+
         {/* Month Navigation & View Mode Switcher */}
         <View style={styles.calendarControlBar}>
           <View style={styles.monthNav}>
@@ -445,29 +435,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.white,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.xl,
-    paddingVertical: Spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
-  },
-  backButton: {
-    marginRight: Spacing.sm,
-    padding: Spacing.xs,
-  },
-  headerTitleContainer: {
-    flex: 1,
-  },
-  headerTitle: {
-    ...Typography.h2,
-    color: Colors.text,
-  },
-  headerSubtitle: {
-    ...Typography.caption,
-    color: Colors.textSecondary,
-  },
   todayPill: {
     backgroundColor: Colors.primaryLight,
     paddingHorizontal: Spacing.md,
@@ -481,13 +448,13 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: Spacing.xl,
-    paddingBottom: Spacing.xxxl,
+    paddingTop: Spacing.sm,
   },
   calendarControlBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: Spacing.md,
+    paddingBottom: Spacing.md,
   },
   monthNav: {
     flexDirection: 'row',
