@@ -111,7 +111,7 @@ export default function SignInScreen() {
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
                   label="Password"
-                  placeholder="••••••••"
+                  placeholder="Enter your password"
                   secureTextEntry
                   autoComplete="password"
                   iconName="lock-closed-outline"
