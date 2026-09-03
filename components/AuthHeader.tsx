@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, Text, StyleSheet } from 'react-native';
 import { Colors, Spacing, Typography } from '@/constants/theme';
 import { Logo } from '@/components/Logo';
+import { BackButton } from '@/components/BackButton';
 
 interface AuthHeaderProps {
   title: string;
@@ -14,9 +14,7 @@ export function AuthHeader({ title, subtitle, onBack }: AuthHeaderProps) {
   return (
     <View style={styles.container}>
       {onBack ? (
-        <TouchableOpacity onPress={onBack} style={styles.backButton} activeOpacity={0.7}>
-          <Ionicons name="arrow-back-outline" size={24} color={Colors.text} />
-        </TouchableOpacity>
+        <BackButton onPress={onBack} style={styles.backButton} />
       ) : (
         <View style={styles.backPlaceholder} />
       )}
@@ -36,12 +34,11 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xl,
   },
   backButton: {
-    paddingVertical: Spacing.sm,
-    alignSelf: 'flex-start',
     marginBottom: Spacing.md,
   },
   backPlaceholder: {
     height: 40,
+    marginBottom: Spacing.md,
   },
   logo: {
     marginBottom: Spacing.lg,

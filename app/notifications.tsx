@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Typography } from '@/constants/theme';
 import { Card } from '@/components/Card';
 import { SettingToggle } from '@/components/SettingToggle';
+import { BackButton } from '@/components/BackButton';
 import { useNotificationStore } from '@/store/useNotificationStore';
 import { isExpoGo } from '@/utils/notifications';
 
@@ -52,9 +52,7 @@ export default function NotificationsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton} activeOpacity={0.7}>
-          <Ionicons name="arrow-back-outline" size={24} color={Colors.text} />
-        </TouchableOpacity>
+        <BackButton onPress={() => router.back()} style={styles.backButton} />
 
         <Text style={styles.title}>Notifications</Text>
         <Text style={styles.subtitle}>
@@ -135,8 +133,6 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.xxl,
   },
   backButton: {
-    paddingVertical: Spacing.sm,
-    alignSelf: 'flex-start',
     marginTop: Spacing.sm,
     marginBottom: Spacing.lg,
   },

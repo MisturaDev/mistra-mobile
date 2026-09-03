@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Typography } from '@/constants/theme';
 import { Button } from '@/components/Button';
 import { Logo } from '@/components/Logo';
 import { OtpInput, OTP_CODE_LENGTH } from '@/components/OtpInput';
+import { BackButton } from '@/components/BackButton';
 import { toast } from '@/components/AppToast';
 import { supabase } from '@/lib/supabase';
 
@@ -96,13 +96,7 @@ export default function VerifyEmailScreen() {
           showsVerticalScrollIndicator={false}
           bounces={true}
         >
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={styles.backButton}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="arrow-back-outline" size={24} color={Colors.text} />
-          </TouchableOpacity>
+          <BackButton onPress={() => router.back()} style={styles.backButton} />
 
           <View style={styles.logoWrap}>
             <Logo size="sm" />
@@ -170,8 +164,6 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.xxl,
   },
   backButton: {
-    paddingVertical: Spacing.sm,
-    alignSelf: 'flex-start',
     marginBottom: Spacing.lg,
   },
   logoWrap: {
