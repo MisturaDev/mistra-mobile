@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert, Linking, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import Constants from 'expo-constants';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, Spacing, Typography } from '@/constants/theme';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { ChangePasswordModal } from '@/components/ChangePasswordModal';
+import { EditProfileModal } from '@/components/EditProfileModal';
+import { PrivacyPolicyModal } from '@/components/PrivacyPolicyModal';
 import { Avatar } from '@/components/Avatar';
 import { Card } from '@/components/Card';
 import { useAuth } from '@/providers/AuthProvider';
@@ -14,7 +16,6 @@ import { useNotificationStore } from '@/store/useNotificationStore';
 import { useProfileAvatar } from '@/hooks/useProfileAvatar';
 import { TabScreenHeader } from '@/components/TabScreenHeader';
 import { useTabScreenInsets } from '@/hooks/useTabBarStyle';
-import { EditProfileModal } from '@/components/EditProfileModal';
 import { updateProfileName } from '@/lib/profileStorage';
 import { changePassword } from '@/lib/authStorage';
 import { toast } from '@/components/AppToast';
@@ -28,6 +29,7 @@ export default function ProfileScreen() {
   const [savingProfile, setSavingProfile] = useState(false);
   const [changePasswordVisible, setChangePasswordVisible] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
+  const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
   const [confirmModal, setConfirmModal] = useState<'signOut' | 'deleteAccount' | null>(null);
   const { pushEnabled, hydrate, isHydrated } = useNotificationStore();
   const { avatarUri, pickAvatar, removeAvatar } = useProfileAvatar(session?.user.id);
@@ -46,6 +48,33 @@ export default function ProfileScreen() {
 
   const userEmail = session?.user.email ?? '';
   const appVersion = Constants.expoConfig?.version ?? '1.0.0';
+
+  const handleHelpAndSupport = async () => {
+    const subject = encodeURIComponent(`Mistra Support Request (v${appVersion})`);
+    const body = encodeURIComponent(
+      `Hi Mistra Support Team,\n\nI need help with:\n\n---\nApp Version: ${appVersion}\nPlatform: ${Platform.OS} (${Platform.Version})\nUser: ${userEmail}`
+    );
+    const mailtoUrl = `mailto:support@mistra.app?subject=${subject}&body=${body}`;
+
+    try {
+      const canOpen = await Linking.canOpenURL(mailtoUrl);
+      if (canOpen) {
+        await Linking.openURL(mailtoUrl);
+      } else {
+        Alert.alert(
+          'Contact Support',
+          'You can reach our support team anytime at:\n\nsupport@mistra.app',
+          [{ text: 'OK' }]
+        );
+      }
+    } catch {
+      Alert.alert(
+        'Contact Support',
+        'You can reach our support team anytime at:\n\nsupport@mistra.app',
+        [{ text: 'OK' }]
+      );
+    }
+  };
 
   const handleSignOutPress = () => {
     setConfirmModal('signOut');
@@ -200,13 +229,14 @@ export default function ProfileScreen() {
           <ProfileMenuRow
             icon="help-circle-outline"
             label="Help & support"
-            onPress={() => showComingSoon('Help & support')}
+            value="support@mistra.app"
+            onPress={handleHelpAndSupport}
           />
           <View style={styles.divider} />
           <ProfileMenuRow
             icon="document-text-outline"
             label="Privacy policy"
-            onPress={() => showComingSoon('Privacy policy')}
+            onPress={() => setPrivacyModalVisible(true)}
           />
         </Card>
 
@@ -214,6 +244,7 @@ export default function ProfileScreen() {
           <ProfileMenuRow
             icon="log-out-outline"
             label="Log out"
+            destructive
             onPress={handleSignOutPress}
             showChevron={false}
           />
@@ -221,7 +252,6 @@ export default function ProfileScreen() {
           <ProfileMenuRow
             icon="trash-outline"
             label="Delete account"
-            value="Permanently remove your account"
             destructive
             onPress={handleDeleteAccountPress}
             showChevron={false}
@@ -254,7 +284,7 @@ export default function ProfileScreen() {
       <ConfirmModal
         visible={confirmModal === 'signOut'}
         title="Log out?"
-        message="Are you sure you want to log out of Mistra on this device?"
+        message="Are you sure you want to log out?"
         confirmLabel="Log out"
         destructive
         loading={loading}
@@ -270,6 +300,11 @@ export default function ProfileScreen() {
         destructive
         onCancel={() => setConfirmModal(null)}
         onConfirm={handleDeleteAccountConfirm}
+      />
+
+      <PrivacyPolicyModal
+        visible={privacyModalVisible}
+        onClose={() => setPrivacyModalVisible(false)}
       />
     </SafeAreaView>
   );
