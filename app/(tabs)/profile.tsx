@@ -284,7 +284,7 @@ export default function ProfileScreen() {
       <ConfirmModal
         visible={confirmModal === 'signOut'}
         title="Log out?"
-        message="Are you sure you want to log out of Mistra on this device?"
+        message="Are you sure you want to log out?"
         confirmLabel="Log out"
         destructive
         loading={loading}
