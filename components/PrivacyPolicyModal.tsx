@@ -35,7 +35,7 @@ export function PrivacyPolicyModal({ visible, onClose }: PrivacyPolicyModalProps
         <View style={styles.header}>
           <View style={styles.headerTextWrap}>
             <Text style={styles.title}>Privacy Policy</Text>
-            <Text style={styles.subtitle}>Effective & Updated: March 2026</Text>
+            <Text style={styles.subtitle}>Effective & Updated: September 2026</Text>
           </View>
           <TouchableOpacity
             onPress={onClose}

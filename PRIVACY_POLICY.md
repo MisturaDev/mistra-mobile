@@ -1,7 +1,7 @@
 # Mistra Privacy Policy
 
-**Effective Date:** March 3, 2026  
-**Last Updated:** March 3, 2026  
+**Effective Date:** September 3, 2026  
+**Last Updated:** September 3, 2026  
 
 At **Mistra** ("we," "our," or "us"), we are committed to protecting your privacy. This Privacy Policy describes how we collect, use, disclose, and safeguard your personal information when you use the Mistra mobile application and related services (collectively, the "Service").
 

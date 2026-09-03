@@ -244,6 +244,7 @@ export default function ProfileScreen() {
           <ProfileMenuRow
             icon="log-out-outline"
             label="Log out"
+            destructive
             onPress={handleSignOutPress}
             showChevron={false}
           />
