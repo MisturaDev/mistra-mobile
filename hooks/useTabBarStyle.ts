@@ -16,22 +16,26 @@ export function useTabBarStyle() {
       borderTopWidth: 1,
       borderTopColor: '#F3F4F6',
       height: TAB_BAR_CONTENT_HEIGHT + insets.bottom,
-      paddingTop: Spacing.xs,
-      paddingBottom: Math.max(insets.bottom, Spacing.xs),
+      paddingTop: 4,
+      paddingBottom: Math.max(insets.bottom, 4),
+      paddingHorizontal: 2,
     },
     tabBarLabelStyle: {
       ...Typography.captionBold,
       fontSize: compact ? 9 : 10,
       marginTop: 2,
+      letterSpacing: -0.2,
     },
     tabBarItemStyle: {
-      paddingVertical: compact ? 2 : 4,
-      minWidth: compact ? 56 : 64,
+      paddingVertical: 2,
+      paddingHorizontal: 0,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     tabBarIconStyle: {
-      marginTop: 2,
+      marginTop: 1,
     },
-    tabBarShowLabel: width >= 320,
+    tabBarShowLabel: true,
   } as const;
 }
 

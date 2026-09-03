@@ -21,7 +21,7 @@ export default function TabsLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'home' : 'home-outline'} size={24} color={color} />
+            <Ionicons name={focused ? 'home' : 'home-outline'} size={22} color={color} />
           ),
         }}
       />
@@ -32,7 +32,7 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? 'checkmark-circle' : 'checkmark-circle-outline'}
-              size={24}
+              size={22}
               color={color}
             />
           ),
@@ -43,7 +43,7 @@ export default function TabsLayout() {
         options={{
           title: 'Habits',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'repeat' : 'repeat-outline'} size={24} color={color} />
+            <Ionicons name={focused ? 'repeat' : 'repeat-outline'} size={22} color={color} />
           ),
         }}
       />
@@ -54,7 +54,7 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? 'document-text' : 'document-text-outline'}
-              size={24}
+              size={22}
               color={color}
             />
           ),
@@ -65,7 +65,7 @@ export default function TabsLayout() {
         options={{
           title: 'Calendar',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'calendar' : 'calendar-outline'} size={24} color={color} />
+            <Ionicons name={focused ? 'calendar' : 'calendar-outline'} size={22} color={color} />
           ),
         }}
       />
@@ -74,7 +74,7 @@ export default function TabsLayout() {
         options={{
           title: 'Profile',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'person' : 'person-outline'} size={24} color={color} />
+            <Ionicons name={focused ? 'person' : 'person-outline'} size={22} color={color} />
           ),
         }}
       />
