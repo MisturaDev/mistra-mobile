@@ -44,8 +44,20 @@ export const changePasswordSchema = z
     path: ['confirmPassword'],
   });
 
+export const resetPasswordSchema = z
+  .object({
+    otp: z.string().length(6, 'Enter the 6-digit code'),
+    password: passwordSchema,
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type SignupInput = z.infer<typeof signupSchema>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 export type ProfileNameInput = z.infer<typeof profileNameSchema>;
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;

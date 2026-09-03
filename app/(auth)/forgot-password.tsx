@@ -9,13 +9,12 @@ import { forgotPasswordSchema, ForgotPasswordInput } from '@/utils/validation';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
 import { AuthHeader } from '@/components/AuthHeader';
-import { Ionicons } from '@expo/vector-icons';
+import { toast } from '@/components/AppToast';
 import { supabase } from '@/lib/supabase';
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
 
   const {
     control,
@@ -40,7 +39,15 @@ export default function ForgotPasswordScreen() {
       return;
     }
 
-    setSuccess(true);
+    toast.info({
+      title: 'Code sent',
+      message: 'Check your email for a 6-digit reset code.',
+    });
+
+    router.push({
+      pathname: '/(auth)/reset-password',
+      params: { email: data.email },
+    });
   };
 
   return (
@@ -56,64 +63,50 @@ export default function ForgotPasswordScreen() {
           showsVerticalScrollIndicator={false}
           bounces={true}
         >
-          {success ? (
-            <View style={styles.successSection}>
-              <View style={styles.successIconContainer}>
-                <Ionicons name="checkmark-circle-outline" size={80} color={Colors.success} />
-              </View>
-              <Text style={styles.titleText}>Check your email</Text>
-              <Text style={styles.descriptionText}>
-                We have sent password reset instructions to your email address.
-              </Text>
-              <Button
-                title="Back to Sign In"
-                variant="primary"
-                size="lg"
-                onPress={() => router.replace('/(auth)/sign-in')}
-                style={styles.successBtn}
-              />
-            </View>
-          ) : (
-            <>
-              <AuthHeader
-                title="Reset password"
-                subtitle="Enter the email associated with your account and we will send instructions to reset your password."
-                onBack={() => router.back()}
-              />
+          <AuthHeader
+            title="Reset password"
+            subtitle="Enter your email address and we'll send you a verification code to reset your password."
+            onBack={() => router.back()}
+          />
 
-            <View style={styles.formSection}>
-              {/* Email Field */}
-              <Controller
-                control={control}
-                name="email"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <Input
-                    label="Email Address"
-                    placeholder="Enter your email address"
-                    keyboardType="email-address"
-                    autoComplete="email"
-                    iconName="mail-outline"
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    value={value}
-                    error={errors.email?.message}
-                    disabled={loading}
-                  />
-                )}
-              />
-            </View>
+          <View style={styles.formSection}>
+            {/* Email Field */}
+            <Controller
+              control={control}
+              name="email"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Input
+                  label="Email Address"
+                  placeholder="Enter your email address"
+                  keyboardType="email-address"
+                  autoComplete="email"
+                  iconName="mail-outline"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  error={errors.email?.message}
+                  disabled={loading}
+                />
+              )}
+            />
+          </View>
 
-            <View style={styles.actionSection}>
-              <Button
-                title="Send Instructions"
-                variant="primary"
-                size="lg"
-                loading={loading}
-                onPress={handleSubmit(onSubmit)}
-              />
+          <View style={styles.actionSection}>
+            <Button
+              title="Send Reset Code"
+              variant="primary"
+              size="lg"
+              loading={loading}
+              onPress={handleSubmit(onSubmit)}
+            />
+
+            <View style={styles.footerRow}>
+              <Text style={styles.footerText}>Remember password? </Text>
+              <TouchableOpacity onPress={() => router.replace('/(auth)/sign-in')}>
+                <Text style={styles.footerLink}>Login</Text>
+              </TouchableOpacity>
             </View>
-          </>
-        )}
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -134,56 +127,25 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.sm,
     paddingBottom: Spacing.xxl,
   },
-  backButton: {
-    paddingVertical: Spacing.sm,
-    alignSelf: 'flex-start',
-    marginBottom: Spacing.lg,
-  },
-  titleSection: {
-    marginBottom: Spacing.xxl,
-  },
-  titleText: {
-    ...Typography.h1,
-    color: Colors.text,
-    textAlign: 'left',
-    marginBottom: Spacing.xs,
-  },
-  subtitleText: {
-    ...Typography.subtitle,
-    color: Colors.textSecondary,
-    fontWeight: '400',
-    lineHeight: 22,
-  },
   formSection: {
     marginBottom: Spacing.md,
   },
   actionSection: {
     marginTop: Spacing.sm,
+    gap: Spacing.md,
   },
-  successSection: {
-    flex: 1,
-    alignItems: 'center',
+  footerRow: {
+    flexDirection: 'row',
     justifyContent: 'center',
-    paddingHorizontal: Spacing.lg,
-  },
-  successIconContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: Colors.successLight,
     alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: Spacing.xxl,
+    marginTop: Spacing.xs,
   },
-  descriptionText: {
+  footerText: {
     ...Typography.body,
     color: Colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 22,
-    marginTop: Spacing.sm,
-    marginBottom: Spacing.xxl,
   },
-  successBtn: {
-    width: '100%',
+  footerLink: {
+    ...Typography.bodyBold,
+    color: Colors.primary,
   },
 });
