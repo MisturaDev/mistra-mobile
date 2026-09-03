@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useForm, Controller } from 'react-hook-form';
@@ -45,40 +45,41 @@ export default function ForgotPasswordScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-        {/* Back Button */}
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.backButton}
-          activeOpacity={0.7}
+      <KeyboardAvoidingView
+        style={styles.keyboardView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="none"
+          showsVerticalScrollIndicator={false}
+          bounces={true}
         >
-          <Ionicons name="arrow-back-outline" size={24} color={Colors.text} />
-        </TouchableOpacity>
-
-        {success ? (
-          <View style={styles.successSection}>
-            <View style={styles.successIconContainer}>
-              <Ionicons name="checkmark-circle-outline" size={80} color={Colors.success} />
+          {success ? (
+            <View style={styles.successSection}>
+              <View style={styles.successIconContainer}>
+                <Ionicons name="checkmark-circle-outline" size={80} color={Colors.success} />
+              </View>
+              <Text style={styles.titleText}>Check your email</Text>
+              <Text style={styles.descriptionText}>
+                We have sent password reset instructions to your email address.
+              </Text>
+              <Button
+                title="Back to Sign In"
+                variant="primary"
+                size="lg"
+                onPress={() => router.replace('/(auth)/sign-in')}
+                style={styles.successBtn}
+              />
             </View>
-            <Text style={styles.titleText}>Check your email</Text>
-            <Text style={styles.descriptionText}>
-              We have sent password reset instructions to your email address.
-            </Text>
-            <Button
-              title="Back to Sign In"
-              variant="primary"
-              size="lg"
-              onPress={() => router.replace('/(auth)/sign-in')}
-              style={styles.successBtn}
-            />
-          </View>
-        ) : (
-          <>
-            <AuthHeader
-              title="Reset password"
-              subtitle="Enter the email associated with your account and we will send instructions to reset your password."
-              onBack={() => router.back()}
-            />
+          ) : (
+            <>
+              <AuthHeader
+                title="Reset password"
+                subtitle="Enter the email associated with your account and we will send instructions to reset your password."
+                onBack={() => router.back()}
+              />
 
             <View style={styles.formSection}>
               {/* Email Field */}
@@ -113,7 +114,8 @@ export default function ForgotPasswordScreen() {
             </View>
           </>
         )}
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -123,10 +125,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.white,
   },
+  keyboardView: {
+    flex: 1,
+  },
   scrollContainer: {
     flexGrow: 1,
     paddingHorizontal: Spacing.xl,
-    paddingBottom: Spacing.xl,
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.xxl,
   },
   backButton: {
     paddingVertical: Spacing.sm,
@@ -149,10 +155,10 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   formSection: {
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.md,
   },
   actionSection: {
-    marginTop: 'auto',
+    marginTop: Spacing.sm,
   },
   successSection: {
     flex: 1,

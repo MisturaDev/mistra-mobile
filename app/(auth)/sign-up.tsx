@@ -61,116 +61,118 @@ export default function SignUpScreen() {
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView
           contentContainerStyle={styles.scrollContainer}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="none"
           showsVerticalScrollIndicator={false}
+          bounces={true}
         >
-        <AuthHeader
-          title="Create account"
-          subtitle="Get started with Mistra today."
-          onBack={() => router.back()}
-        />
-
-        <View style={styles.formSection}>
-          {/* Name Field */}
-          <Controller
-            control={control}
-            name="name"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <Input
-                label="Full Name"
-                placeholder="Your full name"
-                autoComplete="name"
-                iconName="person-outline"
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                error={errors.name?.message}
-                disabled={loading}
-              />
-            )}
+          <AuthHeader
+            title="Create account"
+            subtitle="Get started with Mistra today."
+            onBack={() => router.back()}
           />
 
-          {/* Email Field */}
-          <Controller
-            control={control}
-            name="email"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <Input
-                label="Email Address"
-                placeholder="you@example.com"
-                keyboardType="email-address"
-                autoComplete="email"
-                iconName="mail-outline"
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                error={errors.email?.message}
-                disabled={loading}
-              />
-            )}
-          />
+          <View style={styles.formSection}>
+            {/* Name Field */}
+            <Controller
+              control={control}
+              name="name"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Input
+                  label="Full Name"
+                  placeholder="Your full name"
+                  autoComplete="name"
+                  iconName="person-outline"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  error={errors.name?.message}
+                  disabled={loading}
+                />
+              )}
+            />
 
-          {/* Password Field */}
-          <Controller
-            control={control}
-            name="password"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <Input
-                label="Password"
-                placeholder="Create a password"
-                hint={PASSWORD_HINT}
-                secureTextEntry
-                iconName="lock-closed-outline"
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                error={errors.password?.message}
-                disabled={loading}
-              />
-            )}
-          />
+            {/* Email Field */}
+            <Controller
+              control={control}
+              name="email"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Input
+                  label="Email Address"
+                  placeholder="you@example.com"
+                  keyboardType="email-address"
+                  autoComplete="email"
+                  iconName="mail-outline"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  error={errors.email?.message}
+                  disabled={loading}
+                />
+              )}
+            />
 
-          {/* Confirm Password Field */}
-          <Controller
-            control={control}
-            name="confirmPassword"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <Input
-                label="Confirm Password"
-                placeholder="Confirm your password"
-                secureTextEntry
-                iconName="lock-closed-outline"
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                error={errors.confirmPassword?.message}
-                disabled={loading}
-              />
-            )}
-          />
-        </View>
+            {/* Password Field */}
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Input
+                  label="Password"
+                  placeholder="Create a password"
+                  hint={PASSWORD_HINT}
+                  secureTextEntry
+                  iconName="lock-closed-outline"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  error={errors.password?.message}
+                  disabled={loading}
+                />
+              )}
+            />
 
-        <View style={styles.actionSection}>
-          <Button
-            title="Create Account"
-            variant="primary"
-            size="lg"
-            loading={loading}
-            onPress={handleSubmit(onSubmit)}
-          />
-
-          <View style={styles.footerRow}>
-            <Text style={styles.footerText}>Already have an account? </Text>
-            <TouchableOpacity onPress={() => router.push('/(auth)/sign-in')}>
-              <Text style={styles.footerLink}>Sign In</Text>
-            </TouchableOpacity>
+            {/* Confirm Password Field */}
+            <Controller
+              control={control}
+              name="confirmPassword"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Input
+                  label="Confirm Password"
+                  placeholder="Confirm your password"
+                  secureTextEntry
+                  iconName="lock-closed-outline"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  error={errors.confirmPassword?.message}
+                  disabled={loading}
+                />
+              )}
+            />
           </View>
-        </View>
-      </ScrollView>
+
+          <View style={styles.actionSection}>
+            <Button
+              title="Create Account"
+              variant="primary"
+              size="lg"
+              loading={loading}
+              onPress={handleSubmit(onSubmit)}
+            />
+
+            <View style={styles.footerRow}>
+              <Text style={styles.footerText}>Already have an account? </Text>
+              <TouchableOpacity onPress={() => router.push('/(auth)/sign-in')}>
+                <Text style={styles.footerLink}>Sign In</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -187,20 +189,21 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
     paddingHorizontal: Spacing.xl,
-    paddingBottom: Spacing.xl,
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.xxl,
   },
   formSection: {
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.md,
   },
   actionSection: {
-    marginTop: 'auto',
-    gap: Spacing.lg,
+    marginTop: Spacing.sm,
+    gap: Spacing.md,
   },
   footerRow: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: Spacing.sm,
+    marginTop: Spacing.xs,
   },
   footerText: {
     ...Typography.body,

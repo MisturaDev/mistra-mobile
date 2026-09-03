@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -85,59 +85,72 @@ export default function VerifyEmailScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <TouchableOpacity
-        onPress={() => router.back()}
-        style={styles.backButton}
-        activeOpacity={0.7}
+      <KeyboardAvoidingView
+        style={styles.keyboardView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <Ionicons name="arrow-back-outline" size={24} color={Colors.text} />
-      </TouchableOpacity>
-
-      <View style={styles.logoWrap}>
-        <Logo size="sm" />
-      </View>
-
-      <Text style={styles.title}>Verify your email</Text>
-      <Text style={styles.subtitle}>
-        Enter the {OTP_CODE_LENGTH}-digit code sent to{'\n'}
-        <Text style={styles.email}>{userEmail || 'your email'}</Text>
-      </Text>
-
-      <OtpInput
-        value={otp}
-        onChange={(value) => {
-          setOtp(value);
-          setError('');
-        }}
-        error={error}
-        disabled={loading}
-      />
-
-      <Button
-        title="Verify Email"
-        variant="primary"
-        size="lg"
-        loading={loading}
-        onPress={handleVerify}
-        style={styles.verifyButton}
-      />
-
-      <View style={styles.resendRow}>
-        <Text style={styles.resendText}>Didn't get the code? </Text>
-        <TouchableOpacity
-          onPress={handleResend}
-          disabled={cooldown > 0 || resendLoading}
-          activeOpacity={0.7}
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="none"
+          showsVerticalScrollIndicator={false}
+          bounces={true}
         >
-          <Text style={[styles.resendLink, cooldown > 0 && styles.resendDisabled]}>
-            {resendLoading
-              ? 'Sending...'
-              : cooldown > 0
-                ? `Resend in ${cooldown}s`
-                : 'Resend code'}
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={styles.backButton}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="arrow-back-outline" size={24} color={Colors.text} />
+          </TouchableOpacity>
+
+          <View style={styles.logoWrap}>
+            <Logo size="sm" />
+          </View>
+
+          <Text style={styles.title}>Verify your email</Text>
+          <Text style={styles.subtitle}>
+            Enter the {OTP_CODE_LENGTH}-digit code sent to{'\n'}
+            <Text style={styles.email}>{userEmail || 'your email'}</Text>
           </Text>
-        </TouchableOpacity>
-      </View>
+
+          <OtpInput
+            value={otp}
+            onChange={(value) => {
+              setOtp(value);
+              setError('');
+            }}
+            error={error}
+            disabled={loading}
+          />
+
+          <Button
+            title="Verify Email"
+            variant="primary"
+            size="lg"
+            loading={loading}
+            onPress={handleVerify}
+            style={styles.verifyButton}
+          />
+
+          <View style={styles.resendRow}>
+            <Text style={styles.resendText}>Didn't get the code? </Text>
+            <TouchableOpacity
+              onPress={handleResend}
+              disabled={cooldown > 0 || resendLoading}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.resendLink, cooldown > 0 && styles.resendDisabled]}>
+                {resendLoading
+                  ? 'Sending...'
+                  : cooldown > 0
+                    ? `Resend in ${cooldown}s`
+                    : 'Resend code'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -146,8 +159,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.white,
+  },
+  keyboardView: {
+    flex: 1,
+  },
+  scrollContainer: {
+    flexGrow: 1,
     paddingHorizontal: Spacing.xl,
-    paddingBottom: Spacing.xl,
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.xxl,
   },
   backButton: {
     paddingVertical: Spacing.sm,
@@ -169,14 +189,14 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     textAlign: 'center',
     lineHeight: 22,
-    marginBottom: Spacing.xxl,
+    marginBottom: Spacing.xl,
   },
   email: {
     ...Typography.bodyBold,
     color: Colors.text,
   },
   verifyButton: {
-    marginTop: Spacing.xl,
+    marginTop: Spacing.lg,
   },
   resendRow: {
     flexDirection: 'row',

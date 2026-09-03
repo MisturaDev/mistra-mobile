@@ -68,87 +68,89 @@ export default function SignInScreen() {
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView
           contentContainerStyle={styles.scrollContainer}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="none"
           showsVerticalScrollIndicator={false}
+          bounces={true}
         >
-        <AuthHeader
-          title="Welcome back"
-          subtitle="Sign in to continue organizing your life."
-          onBack={() => router.back()}
-        />
-
-        <View style={styles.formSection}>
-          {/* Email field */}
-          <Controller
-            control={control}
-            name="email"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <Input
-                label="Email Address"
-                placeholder="you@example.com"
-                keyboardType="email-address"
-                autoComplete="email"
-                iconName="mail-outline"
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                error={errors.email?.message}
-                disabled={loading}
-              />
-            )}
+          <AuthHeader
+            title="Welcome back"
+            subtitle="Sign in to continue organizing your life."
+            onBack={() => router.back()}
           />
 
-          {/* Password field */}
-          <Controller
-            control={control}
-            name="password"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <Input
-                label="Password"
-                placeholder="••••••••"
-                secureTextEntry
-                autoComplete="password"
-                iconName="lock-closed-outline"
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                error={errors.password?.message}
-                disabled={loading}
-              />
-            )}
-          />
+          <View style={styles.formSection}>
+            {/* Email field */}
+            <Controller
+              control={control}
+              name="email"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Input
+                  label="Email Address"
+                  placeholder="you@example.com"
+                  keyboardType="email-address"
+                  autoComplete="email"
+                  iconName="mail-outline"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  error={errors.email?.message}
+                  disabled={loading}
+                />
+              )}
+            />
 
-          {/* Forgot Password Link */}
-          <TouchableOpacity
-            onPress={() => router.push('/(auth)/forgot-password')}
-            style={styles.forgotPasswordContainer}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-          </TouchableOpacity>
-        </View>
+            {/* Password field */}
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Input
+                  label="Password"
+                  placeholder="••••••••"
+                  secureTextEntry
+                  autoComplete="password"
+                  iconName="lock-closed-outline"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  error={errors.password?.message}
+                  disabled={loading}
+                />
+              )}
+            />
 
-        <View style={styles.actionSection}>
-          <Button
-            title="Sign In"
-            variant="primary"
-            size="lg"
-            loading={loading}
-            onPress={handleSubmit(onSubmit)}
-          />
-
-          <View style={styles.footerRow}>
-            <Text style={styles.footerText}>Don't have an account? </Text>
-            <TouchableOpacity onPress={() => router.push('/(auth)/sign-up')}>
-              <Text style={styles.footerLink}>Sign Up</Text>
+            {/* Forgot Password Link */}
+            <TouchableOpacity
+              onPress={() => router.push('/(auth)/forgot-password')}
+              style={styles.forgotPasswordContainer}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
             </TouchableOpacity>
           </View>
-        </View>
-      </ScrollView>
+
+          <View style={styles.actionSection}>
+            <Button
+              title="Sign In"
+              variant="primary"
+              size="lg"
+              loading={loading}
+              onPress={handleSubmit(onSubmit)}
+            />
+
+            <View style={styles.footerRow}>
+              <Text style={styles.footerText}>Don't have an account? </Text>
+              <TouchableOpacity onPress={() => router.push('/(auth)/sign-up')}>
+                <Text style={styles.footerLink}>Sign Up</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -165,28 +167,30 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
     paddingHorizontal: Spacing.xl,
-    paddingBottom: Spacing.xl,
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.xxl,
   },
   formSection: {
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.sm,
   },
   forgotPasswordContainer: {
     alignSelf: 'flex-end',
     marginTop: Spacing.xs,
+    marginBottom: Spacing.md,
   },
   forgotPasswordText: {
     ...Typography.bodyBold,
     color: Colors.primary,
   },
   actionSection: {
-    marginTop: 'auto',
-    gap: Spacing.lg,
+    marginTop: Spacing.sm,
+    gap: Spacing.md,
   },
   footerRow: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: Spacing.sm,
+    marginTop: Spacing.xs,
   },
   footerText: {
     ...Typography.body,
