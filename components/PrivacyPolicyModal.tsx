@@ -7,6 +7,7 @@ import {
   ScrollView,
   TouchableOpacity,
   SafeAreaView,
+  Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Radius, Typography } from '@/constants/theme';
@@ -18,6 +19,10 @@ interface PrivacyPolicyModalProps {
 }
 
 export function PrivacyPolicyModal({ visible, onClose }: PrivacyPolicyModalProps) {
+  const handleEmailSupport = () => {
+    Linking.openURL('mailto:support@mistra.app?subject=Privacy%20Policy%20Inquiry');
+  };
+
   return (
     <Modal
       visible={visible}
@@ -30,7 +35,7 @@ export function PrivacyPolicyModal({ visible, onClose }: PrivacyPolicyModalProps
         <View style={styles.header}>
           <View style={styles.headerTextWrap}>
             <Text style={styles.title}>Privacy Policy</Text>
-            <Text style={styles.subtitle}>Last updated: March 2026</Text>
+            <Text style={styles.subtitle}>Effective & Updated: March 2026</Text>
           </View>
           <TouchableOpacity
             onPress={onClose}
@@ -48,68 +53,84 @@ export function PrivacyPolicyModal({ visible, onClose }: PrivacyPolicyModalProps
           contentContainerStyle={styles.scrollContent}
         >
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>1. Introduction</Text>
+            <Text style={styles.sectionTitle}>1. Overview & Commitment</Text>
             <Text style={styles.paragraph}>
-              Welcome to Mistra. We value your trust and are committed to protecting your personal
-              information and privacy. This Privacy Policy explains how we collect, use, and safe-guard
-              your information when you use our mobile application.
+              At <Text style={styles.bold}>Mistra</Text>, your privacy is our top priority. We
+              design our productivity app to help you stay organized without compromising your personal
+              data. We never sell, rent, or monetize your workspace content to third parties or
+              advertisers.
             </Text>
           </View>
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>2. Information We Collect</Text>
             <Text style={styles.paragraph}>
-              <Text style={styles.bold}>Account Information: </Text>
-              When you create an account, we collect your name and email address to authenticate you
-              and sync your data across devices.
+              <Text style={styles.bold}>• Account Details: </Text>
+              Your name and email address used for authentication and account security. Passwords are
+              always cryptographically hashed.
             </Text>
             <Text style={styles.paragraph}>
-              <Text style={styles.bold}>Your Productivity Data: </Text>
-              Your tasks, habits, notes, calendar events, and reminders are securely stored in your
-              encrypted private account database and are never shared or sold to third parties.
+              <Text style={styles.bold}>• Your Workspace Content: </Text>
+              Your tasks, subtasks, habits, notes, calendar events, due dates, and tags. This data is
+              stored securely in your private, isolated account database.
             </Text>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>3. How We Use Your Information</Text>
             <Text style={styles.paragraph}>
-              We use your information solely to:
-              {'\n'}• Provide, operate, and maintain your personal workspace
-              {'\n'}• Sync your tasks, habits, notes, and events across devices
-              {'\n'}• Send essential security and reminder notifications (if enabled)
-              {'\n'}• Respond to customer support requests
+              <Text style={styles.bold}>• Device & Notifications: </Text>
+              Device tokens used exclusively to send your scheduled reminders and push notifications
+              when enabled.
             </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>4. Data Security</Text>
+            <Text style={styles.sectionTitle}>3. How We Use Your Data</Text>
             <Text style={styles.paragraph}>
-              We implement industry-standard encryption protocols (SSL/TLS in transit and encrypted
-              at rest) to safeguard your personal information against unauthorized access, disclosure,
-              or loss.
+              We use your information strictly to:
+              {'\n'}• Provide and maintain your personal workspace
+              {'\n'}• Seamlessly sync your data across your devices
+              {'\n'}• Deliver task, habit, and calendar notifications you request
+              {'\n'}• Provide customer support and diagnose technical issues
             </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>5. Your Rights & Data Control</Text>
+            <Text style={styles.sectionTitle}>4. Data Security & Storage</Text>
             <Text style={styles.paragraph}>
-              You have full ownership of your data. You can export, modify, or permanently delete
-              your account and all associated data at any time from your Profile settings.
+              All data is transmitted via encrypted HTTPS (TLS 1.3) protocols and stored in secure
+              cloud databases protected with strict Row Level Security (RLS) policies, ensuring only
+              your authenticated account can read or write your workspace records.
             </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>6. Contact Us</Text>
+            <Text style={styles.sectionTitle}>5. Data Ownership & Deletion</Text>
             <Text style={styles.paragraph}>
-              If you have any questions or concerns regarding this Privacy Policy, please contact us
-              at:
-              {'\n'}
+              You retain full ownership of your data at all times. You can edit, export, or permanently
+              delete your account and all associated data directly in your Profile settings or by
+              contacting support.
+            </Text>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>6. GDPR & CCPA Compliance</Text>
+            <Text style={styles.paragraph}>
+              We respect your global privacy rights, including rights to access, rectification, data
+              portability, and erasure of personal information.
+            </Text>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>7. Contact Us</Text>
+            <Text style={styles.paragraph}>
+              If you have any questions or feedback regarding our privacy practices, please contact us:
+            </Text>
+            <TouchableOpacity onPress={handleEmailSupport} activeOpacity={0.7} style={styles.emailBadge}>
+              <Ionicons name="mail-outline" size={16} color={Colors.primary} />
               <Text style={styles.contactEmail}>support@mistra.app</Text>
-            </Text>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.buttonWrap}>
-            <Button title="Done" variant="primary" size="lg" onPress={onClose} />
+            <Button title="Got it, thanks" variant="primary" size="lg" onPress={onClose} />
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -175,9 +196,21 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.text,
   },
+  emailBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    backgroundColor: Colors.primaryLight,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: Radius.md,
+    alignSelf: 'flex-start',
+    marginTop: Spacing.xs,
+  },
   contactEmail: {
-    color: Colors.primary,
-    fontWeight: '600',
+    color: Colors.primaryDark,
+    fontWeight: '700',
+    fontSize: 14,
   },
   buttonWrap: {
     marginTop: Spacing.md,
