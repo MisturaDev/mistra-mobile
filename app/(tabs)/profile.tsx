@@ -252,7 +252,6 @@ export default function ProfileScreen() {
           <ProfileMenuRow
             icon="trash-outline"
             label="Delete account"
-            value="Permanently remove your account"
             destructive
             onPress={handleDeleteAccountPress}
             showChevron={false}
