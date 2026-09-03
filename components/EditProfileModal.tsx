@@ -59,7 +59,7 @@ export function EditProfileModal({
             <Text style={styles.title}>Edit profile</Text>
             <Input
               label="Full name"
-              placeholder="Your full name"
+              placeholder="Enter your full name"
               value={name}
               onChangeText={(value) => {
                 setName(value);

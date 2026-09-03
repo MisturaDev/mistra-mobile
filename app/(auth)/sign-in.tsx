@@ -91,7 +91,7 @@ export default function SignInScreen() {
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
                   label="Email Address"
-                  placeholder="you@example.com"
+                  placeholder="Enter your email address"
                   keyboardType="email-address"
                   autoComplete="email"
                   iconName="mail-outline"
