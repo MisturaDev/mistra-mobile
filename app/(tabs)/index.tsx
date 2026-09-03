@@ -12,6 +12,7 @@ import { useProfileAvatar } from '@/hooks/useProfileAvatar';
 import { useTasks } from '@/hooks/useTasks';
 import { useHabits } from '@/hooks/useHabits';
 import { useNotes } from '@/hooks/useNotes';
+import { useEvents } from '@/hooks/useEvents';
 import { getFirstName, getUserNameFromSession } from '@/utils/userName';
 import { ProgressBar } from '@/components/ProgressBar';
 import { Card } from '@/components/Card';
@@ -114,8 +115,20 @@ export default function HomeDashboardScreen() {
     refetch: refetchNotes,
   } = useNotes(userId);
 
-  const isLoading = tasksLoading || habitsLoading || notesLoading;
-  const hasError = tasksError || habitsError || notesError;
+  const {
+    events,
+    isLoading: eventsLoading,
+    isError: eventsError,
+    refetch: refetchEvents,
+  } = useEvents(userId);
+
+  const todayString = useMemo(() => new Date().toISOString().split('T')[0], []);
+  const todayEvents = useMemo(() => {
+    return events.filter((ev) => ev.eventDate === todayString);
+  }, [events, todayString]);
+
+  const isLoading = tasksLoading || habitsLoading || notesLoading || eventsLoading;
+  const hasError = tasksError || habitsError || notesError || eventsError;
   const completedTasks = tasks.filter((task) => task.completed).length;
   const completedHabits = habits.filter((habit) => habit.completed).length;
   const totalItems = tasks.length + habits.length;
@@ -131,6 +144,7 @@ export default function HomeDashboardScreen() {
     refetchTasks();
     refetchHabits();
     refetchNotes();
+    refetchEvents();
   };
 
   const showLists = !isLoading && !hasError;
@@ -291,6 +305,48 @@ export default function HomeDashboardScreen() {
           ) : null}
           {showLists ? (
             <View style={styles.listsSection}>
+              <DashboardSection
+                title="Today's schedule"
+                actionLabel="Calendar"
+                onActionPress={() => router.push('/(tabs)/calendar')}
+              >
+                <View style={styles.eventsList}>
+                  {todayEvents.length === 0 ? (
+                    <Card style={styles.listCard} padded elevation="none">
+                      <Text style={styles.emptyText}>No events scheduled today. Tap Calendar to add one.</Text>
+                    </Card>
+                  ) : (
+                    todayEvents.slice(0, 3).map((event) => (
+                      <TouchableOpacity
+                        key={event.id}
+                        style={styles.eventCard}
+                        activeOpacity={0.7}
+                        onPress={() => router.push('/(tabs)/calendar')}
+                      >
+                        <View style={[styles.eventColorBar, { backgroundColor: event.color || Colors.primary }]} />
+                        <View style={styles.eventDetails}>
+                          <Text style={styles.eventTitle} numberOfLines={1}>
+                            {event.title}
+                          </Text>
+                          <View style={styles.eventMetaRow}>
+                            <Ionicons name="time-outline" size={13} color={Colors.textSecondary} />
+                            <Text style={styles.eventTimeText}>
+                              {event.isAllDay ? 'All Day' : `${event.startTime} – ${event.endTime}`}
+                            </Text>
+                            {event.description ? (
+                              <Text style={styles.eventDescriptionText} numberOfLines={1}>
+                                · {event.description}
+                              </Text>
+                            ) : null}
+                          </View>
+                        </View>
+                        <Ionicons name="chevron-forward" size={16} color={Colors.textLight} />
+                      </TouchableOpacity>
+                    ))
+                  )}
+                </View>
+              </DashboardSection>
+
               <DashboardSection
                 title="Today's tasks"
                 actionLabel="See all"
@@ -504,5 +560,48 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: Colors.borderLight,
+  },
+  eventsList: {
+    gap: Spacing.sm,
+  },
+  eventCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.lg,
+    padding: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    gap: Spacing.md,
+  },
+  eventColorBar: {
+    width: 4,
+    height: 36,
+    borderRadius: 2,
+  },
+  eventDetails: {
+    flex: 1,
+    gap: 2,
+  },
+  eventTitle: {
+    ...Typography.bodyBold,
+    color: Colors.text,
+    fontSize: 15,
+  },
+  eventMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  eventTimeText: {
+    ...Typography.captionBold,
+    color: Colors.textSecondary,
+    fontSize: 12,
+  },
+  eventDescriptionText: {
+    ...Typography.caption,
+    color: Colors.textLight,
+    fontSize: 12,
+    flex: 1,
   },
 });
