@@ -60,16 +60,7 @@ export default function ProfileScreen() {
     const mailtoUrl = `mailto:support@mistra.app?subject=${subject}&body=${body}`;
 
     try {
-      const canOpen = await Linking.canOpenURL(mailtoUrl);
-      if (canOpen) {
-        await Linking.openURL(mailtoUrl);
-      } else {
-        Alert.alert(
-          'Contact Support',
-          'You can reach our support team anytime at:\n\nsupport@mistra.app',
-          [{ text: 'OK' }]
-        );
-      }
+      await Linking.openURL(mailtoUrl);
     } catch {
       Alert.alert(
         'Contact Support',

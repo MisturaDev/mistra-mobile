@@ -76,15 +76,13 @@ export function BottomSheetWrapper({
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={[styles.keyboardView, { maxHeight }]}
-          pointerEvents="box-none"
         >
-          <Pressable
+          <View
             style={[
               styles.sheetContainer,
-              { paddingBottom: Math.max(insets.bottom, Spacing.md) },
+              { paddingBottom: scrollable ? 0 : Math.max(insets.bottom, Spacing.md) },
               containerStyle,
             ]}
-            onPress={(e) => e.stopPropagation()}
           >
             {/* Drag Handle Indicator */}
             {showHandle ? (
@@ -93,7 +91,7 @@ export function BottomSheetWrapper({
               </View>
             ) : null}
 
-            {/* Header (if title, subtitle, headerRight, or close button) */}
+            {/* Header (fixed at top of sheet) */}
             {title || headerRight || showCloseButton ? (
               <View style={styles.header}>
                 <View style={styles.titleWrap}>
@@ -122,16 +120,23 @@ export function BottomSheetWrapper({
             {/* Content: Either ScrollView or raw container */}
             {scrollable ? (
               <ScrollView
+                style={styles.scrollView}
                 showsVerticalScrollIndicator={false}
                 keyboardShouldPersistTaps="handled"
-                contentContainerStyle={[styles.scrollContent, contentContainerStyle]}
+                nestedScrollEnabled={true}
+                bounces={true}
+                contentContainerStyle={[
+                  styles.scrollContent,
+                  { paddingBottom: Math.max(insets.bottom, 16) + Spacing.xl },
+                  contentContainerStyle,
+                ]}
               >
                 {children}
               </ScrollView>
             ) : (
               <View style={[styles.staticContent, contentContainerStyle]}>{children}</View>
             )}
-          </Pressable>
+          </View>
         </KeyboardAvoidingView>
       </View>
     </Modal>
@@ -215,10 +220,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.borderLight,
   },
+  scrollView: {
+    flexShrink: 1,
+    width: '100%',
+  },
   scrollContent: {
     paddingHorizontal: Spacing.xl,
     paddingTop: Spacing.md,
-    paddingBottom: Spacing.lg,
   },
   staticContent: {
     paddingHorizontal: Spacing.xl,
