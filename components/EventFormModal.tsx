@@ -170,10 +170,10 @@ export function EventFormModal({
 
       {/* Description */}
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>Description & Notes (Optional)</Text>
+        <Text style={styles.sectionLabel}>Description (Optional)</Text>
         <TextInput
           style={styles.descriptionInput}
-          placeholder="Location, video call link, or notes..."
+          placeholder="Add details, link, or location..."
           placeholderTextColor={Colors.textLight}
           value={description}
           onChangeText={setDescription}

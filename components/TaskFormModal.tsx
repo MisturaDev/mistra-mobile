@@ -279,12 +279,12 @@ export function TaskFormModal({
         </View>
       </View>
 
-      {/* Description & Notes */}
+      {/* Description */}
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>Notes & Description (Optional)</Text>
+        <Text style={styles.sectionLabel}>Description (Optional)</Text>
         <TextInput
           style={styles.descriptionInput}
-          placeholder="Additional context, links, or notes..."
+          placeholder="Add details, links, or notes..."
           placeholderTextColor={Colors.textLight}
           value={description}
           onChangeText={setDescription}
