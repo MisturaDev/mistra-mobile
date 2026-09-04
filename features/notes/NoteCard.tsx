@@ -1,8 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Card } from '@/components/Card';
-import { Colors, Spacing, Radius, Typography, Shadows } from '@/constants/theme';
+import { Colors, Spacing, Radius, Typography } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import { NoteIcon } from '@/components/NoteIcon';
 import type { Note } from '@/types/dashboard';
 
 interface NoteCardProps {
@@ -52,7 +53,9 @@ export function NoteCard({ note, onPress, onTogglePin, onDelete }: NoteCardProps
       >
         <View style={styles.header}>
           <View style={styles.titleContainer}>
-            <Text style={styles.emoji}>{note.emoji || '📝'}</Text>
+            <View style={styles.iconContainer}>
+              <NoteIcon name={note.emoji || 'document-text-outline'} size={16} color={Colors.primary} />
+            </View>
             <Text style={styles.title} numberOfLines={1}>
               {note.title}
             </Text>
@@ -127,10 +130,15 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.sm,
+    gap: Spacing.xs,
   },
-  emoji: {
-    fontSize: 18,
+  iconContainer: {
+    width: 28,
+    height: 28,
+    borderRadius: Radius.sm,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   title: {
     ...Typography.title,

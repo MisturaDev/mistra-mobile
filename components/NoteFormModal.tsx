@@ -12,8 +12,7 @@ import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
 import { Ionicons } from '@expo/vector-icons';
 import { BottomSheetWrapper } from '@/components/BottomSheetWrapper';
-
-const EMOJI_OPTIONS = ['📝', '💡', '🎯', '📌', '🚀', '📚', '☕', '✨', '💼', '🏷️', '💭', '🔑'];
+import { NOTE_ICON_OPTIONS } from '@/components/NoteIcon';
 
 export interface NoteFormData {
   title: string;
@@ -39,7 +38,7 @@ export function NoteFormModal({
   mode,
   initialTitle = '',
   initialContent = '',
-  initialEmoji = '📝',
+  initialEmoji = 'document-text-outline',
   initialIsPinned = false,
   loading = false,
   onClose,
@@ -55,7 +54,7 @@ export function NoteFormModal({
     if (visible) {
       setTitle(initialTitle);
       setContent(initialContent);
-      setEmoji(initialEmoji || '📝');
+      setEmoji(initialEmoji || 'document-text-outline');
       setIsPinned(initialIsPinned);
       setError('');
     }
@@ -106,24 +105,28 @@ export function NoteFormModal({
       scrollable
       maxHeight="92%"
     >
-      {/* Emoji Selector */}
-      <View style={styles.emojiSection}>
+      {/* Vector Icon Selector */}
+      <View style={styles.iconSection}>
         <Text style={styles.sectionLabel}>Icon</Text>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.emojiRow}
+          contentContainerStyle={styles.iconRow}
         >
-          {EMOJI_OPTIONS.map((item) => {
-            const isSelected = item === emoji;
+          {NOTE_ICON_OPTIONS.map((item) => {
+            const isSelected = item.key === emoji || item.iconName === emoji;
             return (
               <TouchableOpacity
-                key={item}
-                onPress={() => setEmoji(item)}
-                style={[styles.emojiOption, isSelected && styles.emojiOptionSelected]}
+                key={item.key}
+                onPress={() => setEmoji(item.iconName)}
+                style={[styles.iconOption, isSelected && styles.iconOptionSelected]}
                 activeOpacity={0.7}
               >
-                <Text style={styles.emojiText}>{item}</Text>
+                <Ionicons
+                  name={item.iconName}
+                  size={19}
+                  color={isSelected ? Colors.primary : Colors.textSecondary}
+                />
               </TouchableOpacity>
             );
           })}
@@ -210,7 +213,7 @@ const styles = StyleSheet.create({
   pinToggleTextActive: {
     color: Colors.primary,
   },
-  emojiSection: {
+  iconSection: {
     marginBottom: Spacing.md,
   },
   sectionLabel: {
@@ -220,14 +223,14 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
-  emojiRow: {
+  iconRow: {
     flexDirection: 'row',
     gap: Spacing.xs,
     paddingVertical: Spacing.xs,
   },
-  emojiOption: {
-    width: 38,
-    height: 38,
+  iconOption: {
+    width: 40,
+    height: 40,
     borderRadius: Radius.md,
     backgroundColor: Colors.surface,
     alignItems: 'center',
@@ -235,13 +238,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.borderLight,
   },
-  emojiOptionSelected: {
+  iconOptionSelected: {
     backgroundColor: Colors.primaryLight,
     borderColor: Colors.primary,
     transform: [{ scale: 1.05 }],
-  },
-  emojiText: {
-    fontSize: 18,
   },
   contentSection: {
     marginTop: Spacing.xs,

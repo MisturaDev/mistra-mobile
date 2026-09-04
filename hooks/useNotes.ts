@@ -22,7 +22,7 @@ function mapNote(row: NoteRow): Note {
     id: row.id,
     title: row.title,
     content: row.content ?? '',
-    emoji: row.emoji || '📝',
+    emoji: row.emoji || 'document-text-outline',
     isPinned: row.is_pinned ?? false,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -55,7 +55,7 @@ export function useNotes(userId: string | undefined) {
     mutationFn: async ({
       title,
       content = '',
-      emoji = '📝',
+      emoji = 'document-text-outline',
       isPinned = false,
     }: CreateNoteInput) => {
       if (!userId) throw new Error('You must be signed in to add notes.');
@@ -85,7 +85,7 @@ export function useNotes(userId: string | undefined) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, title, content = '', emoji = '📝', isPinned }: UpdateNoteInput) => {
+    mutationFn: async ({ id, title, content = '', emoji = 'document-text-outline', isPinned }: UpdateNoteInput) => {
       const updates: Partial<NoteRow> = {
         title,
         content,
@@ -99,7 +99,7 @@ export function useNotes(userId: string | undefined) {
       const { error } = await supabase.from('notes').update(updates).eq('id', id);
       if (error) throw error;
     },
-    onMutate: async ({ id, title, content = '', emoji = '📝', isPinned }) => {
+    onMutate: async ({ id, title, content = '', emoji = 'document-text-outline', isPinned }) => {
       await queryClient.cancelQueries({ queryKey });
       const previous = queryClient.getQueryData<Note[]>(queryKey);
       queryClient.setQueryData<Note[]>(queryKey, (current) =>

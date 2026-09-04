@@ -277,7 +277,7 @@ export default function NotesScreen() {
         mode={noteForm?.mode ?? 'create'}
         initialTitle={noteForm?.mode === 'edit' ? noteForm.note.title : ''}
         initialContent={noteForm?.mode === 'edit' ? noteForm.note.content : ''}
-        initialEmoji={noteForm?.mode === 'edit' ? noteForm.note.emoji : '📝'}
+        initialEmoji={noteForm?.mode === 'edit' ? noteForm.note.emoji : 'document-text-outline'}
         initialIsPinned={noteForm?.mode === 'edit' ? noteForm.note.isPinned : false}
         loading={isSaving}
         onClose={closeNoteForm}

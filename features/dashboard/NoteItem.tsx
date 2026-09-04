@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Card } from '@/components/Card';
 import { Colors, Spacing, Radius, Typography } from '@/constants/theme';
+import { NoteIcon } from '@/components/NoteIcon';
 
 export interface NoteItemProps {
   id?: string;
@@ -16,7 +17,7 @@ export const NoteItem: React.FC<NoteItemProps> = ({
   title,
   snippet,
   updatedAt,
-  emoji = '📝',
+  emoji = 'document-text-outline',
   onPress,
 }) => {
   return (
@@ -29,7 +30,9 @@ export const NoteItem: React.FC<NoteItemProps> = ({
       >
         <View style={styles.header}>
           <View style={styles.titleRow}>
-            <Text style={styles.emoji}>{emoji}</Text>
+            <View style={styles.iconWrap}>
+              <NoteIcon name={emoji} size={14} color={Colors.primary} />
+            </View>
             <Text style={styles.titleText} numberOfLines={1}>
               {title}
             </Text>
@@ -69,8 +72,13 @@ const styles = StyleSheet.create({
     gap: Spacing.xs,
     flex: 1,
   },
-  emoji: {
-    fontSize: 16,
+  iconWrap: {
+    width: 24,
+    height: 24,
+    borderRadius: Radius.sm,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   titleText: {
     ...Typography.bodyBold,

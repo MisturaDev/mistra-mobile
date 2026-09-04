@@ -10,6 +10,7 @@ import {
 import { Colors, Spacing, Radius, Typography } from '@/constants/theme';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
+import { Ionicons } from '@expo/vector-icons';
 import { BottomSheetWrapper } from '@/components/BottomSheetWrapper';
 import type { EventCategory } from '@/types/dashboard';
 
@@ -41,13 +42,13 @@ interface EventFormModalProps {
   onSubmit: (data: EventFormData) => void;
 }
 
-const CATEGORIES: { key: EventCategory; label: string; icon: string; color: string; bg: string }[] = [
-  { key: 'meeting', label: 'Meeting', icon: '👥', color: '#1D4ED8', bg: '#EFF6FF' },
-  { key: 'work', label: 'Work', icon: '💼', color: '#7C3AED', bg: '#F5F3FF' },
-  { key: 'personal', label: 'Personal', icon: '🏠', color: '#D97706', bg: '#FEF3C7' },
-  { key: 'health', label: 'Health', icon: '💪', color: '#059669', bg: '#D1FAE5' },
-  { key: 'study', label: 'Study', icon: '📚', color: '#DC2626', bg: '#FEE2E2' },
-  { key: 'general', label: 'General', icon: '🏷️', color: '#4B5563', bg: '#F3F4F6' },
+const CATEGORIES: { key: EventCategory; label: string; icon: keyof typeof Ionicons.glyphMap; color: string; bg: string }[] = [
+  { key: 'meeting', label: 'Meeting', icon: 'people-outline', color: '#1D4ED8', bg: '#EFF6FF' },
+  { key: 'work', label: 'Work', icon: 'briefcase-outline', color: '#7C3AED', bg: '#F5F3FF' },
+  { key: 'personal', label: 'Personal', icon: 'home-outline', color: '#D97706', bg: '#FEF3C7' },
+  { key: 'health', label: 'Health', icon: 'fitness-outline', color: '#059669', bg: '#D1FAE5' },
+  { key: 'study', label: 'Study', icon: 'book-outline', color: '#DC2626', bg: '#FEE2E2' },
+  { key: 'general', label: 'General', icon: 'pricetag-outline', color: '#4B5563', bg: '#F3F4F6' },
 ];
 
 const TIME_PRESETS = ['09:00 AM', '10:00 AM', '11:30 AM', '02:00 PM', '04:00 PM', '06:00 PM'];
@@ -165,7 +166,11 @@ export function EventFormModal({
                 ]}
                 activeOpacity={0.7}
               >
-                <Text style={styles.categoryIcon}>{cat.icon}</Text>
+                <Ionicons
+                  name={cat.icon}
+                  size={14}
+                  color={isSelected ? cat.color : Colors.textSecondary}
+                />
                 <Text
                   style={[
                     styles.categoryText,
@@ -273,16 +278,13 @@ const styles = StyleSheet.create({
   categoryChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 6,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs,
     borderRadius: Radius.full,
     backgroundColor: Colors.surface,
     borderWidth: 1,
     borderColor: Colors.border,
-  },
-  categoryIcon: {
-    fontSize: 12,
   },
   categoryText: {
     ...Typography.caption,

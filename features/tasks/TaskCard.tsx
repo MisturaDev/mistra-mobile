@@ -13,13 +13,16 @@ interface TaskCardProps {
   onDelete: (task: Task) => void;
 }
 
-const CATEGORY_META: Record<TaskCategory, { label: string; icon: string; color: string; bg: string }> = {
-  general: { label: 'General', icon: '🏷️', color: '#4B5563', bg: '#F3F4F6' },
-  work: { label: 'Work', icon: '💼', color: '#1D4ED8', bg: '#EFF6FF' },
-  personal: { label: 'Personal', icon: '🏠', color: '#7C3AED', bg: '#F5F3FF' },
-  study: { label: 'Study', icon: '📚', color: '#D97706', bg: '#FEF3C7' },
-  health: { label: 'Health', icon: '💪', color: '#059669', bg: '#D1FAE5' },
-  shopping: { label: 'Shopping', icon: '🛒', color: '#DC2626', bg: '#FEE2E2' },
+const CATEGORY_META: Record<
+  TaskCategory,
+  { label: string; icon: keyof typeof Ionicons.glyphMap; color: string; bg: string }
+> = {
+  general: { label: 'General', icon: 'pricetag-outline', color: '#4B5563', bg: '#F3F4F6' },
+  work: { label: 'Work', icon: 'briefcase-outline', color: '#1D4ED8', bg: '#EFF6FF' },
+  personal: { label: 'Personal', icon: 'home-outline', color: '#7C3AED', bg: '#F5F3FF' },
+  study: { label: 'Study', icon: 'book-outline', color: '#D97706', bg: '#FEF3C7' },
+  health: { label: 'Health', icon: 'fitness-outline', color: '#059669', bg: '#D1FAE5' },
+  shopping: { label: 'Shopping', icon: 'cart-outline', color: '#DC2626', bg: '#FEE2E2' },
 };
 
 const PRIORITY_META: Record<TaskPriority, { label: string; color: string; bg: string } | null> = {
@@ -141,7 +144,7 @@ export function TaskCard({
           <View style={styles.badgesRow}>
             {/* Category Badge */}
             <View style={[styles.categoryBadge, { backgroundColor: cat.bg }]}>
-              <Text style={styles.categoryIcon}>{cat.icon}</Text>
+              <Ionicons name={cat.icon} size={11} color={cat.color} />
               <Text style={[styles.categoryLabel, { color: cat.color }]}>{cat.label}</Text>
             </View>
 
@@ -313,13 +316,10 @@ const styles = StyleSheet.create({
   categoryBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 3,
+    gap: 4,
     paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingVertical: 2.5,
     borderRadius: Radius.full,
-  },
-  categoryIcon: {
-    fontSize: 10,
   },
   categoryLabel: {
     fontSize: 11,

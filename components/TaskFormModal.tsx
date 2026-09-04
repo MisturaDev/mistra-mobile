@@ -43,13 +43,13 @@ const PRIORITIES: { key: TaskPriority; label: string; color: string; bg: string 
   { key: 'high', label: 'High', color: '#DC2626', bg: '#FEE2E2' },
 ];
 
-const CATEGORIES: { key: TaskCategory; label: string; icon: string }[] = [
-  { key: 'general', label: 'General', icon: '🏷️' },
-  { key: 'work', label: 'Work', icon: '💼' },
-  { key: 'personal', label: 'Personal', icon: '🏠' },
-  { key: 'study', label: 'Study', icon: '📚' },
-  { key: 'health', label: 'Health', icon: '💪' },
-  { key: 'shopping', label: 'Shopping', icon: '🛒' },
+const CATEGORIES: { key: TaskCategory; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { key: 'general', label: 'General', icon: 'pricetag-outline' },
+  { key: 'work', label: 'Work', icon: 'briefcase-outline' },
+  { key: 'personal', label: 'Personal', icon: 'home-outline' },
+  { key: 'study', label: 'Study', icon: 'book-outline' },
+  { key: 'health', label: 'Health', icon: 'fitness-outline' },
+  { key: 'shopping', label: 'Shopping', icon: 'cart-outline' },
 ];
 
 const DUE_DATE_OPTIONS: { key: string; label: string; getDate: () => string | null }[] = [
@@ -184,7 +184,11 @@ export function TaskFormModal({
                 style={[styles.categoryChip, isSelected && styles.categoryChipSelected]}
                 activeOpacity={0.7}
               >
-                <Text style={styles.categoryIcon}>{cat.icon}</Text>
+                <Ionicons
+                  name={cat.icon}
+                  size={14}
+                  color={isSelected ? Colors.primary : Colors.textSecondary}
+                />
                 <Text style={[styles.categoryText, isSelected && styles.categoryTextSelected]}>
                   {cat.label}
                 </Text>
@@ -337,7 +341,7 @@ const styles = StyleSheet.create({
   categoryChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 6,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs,
     borderRadius: Radius.full,
@@ -348,9 +352,6 @@ const styles = StyleSheet.create({
   categoryChipSelected: {
     backgroundColor: Colors.primaryLight,
     borderColor: Colors.primary,
-  },
-  categoryIcon: {
-    fontSize: 12,
   },
   categoryText: {
     ...Typography.caption,

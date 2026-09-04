@@ -16,23 +16,23 @@ interface AgendaTaskItemProps {
   onToggle: (id: string) => void;
 }
 
-const EVENT_CATEGORY_ICONS: Record<EventCategory, string> = {
-  meeting: '👥',
-  work: '💼',
-  personal: '🏠',
-  health: '💪',
-  study: '📚',
-  general: '🏷️',
+const EVENT_CATEGORY_ICONS: Record<EventCategory, keyof typeof Ionicons.glyphMap> = {
+  meeting: 'people-outline',
+  work: 'briefcase-outline',
+  personal: 'home-outline',
+  health: 'fitness-outline',
+  study: 'book-outline',
+  general: 'pricetag-outline',
 };
 
 export function AgendaEventCard({ event, onEdit, onDelete }: AgendaEventItemProps) {
-  const icon = EVENT_CATEGORY_ICONS[event.category] || '📅';
+  const icon = EVENT_CATEGORY_ICONS[event.category] || 'calendar-outline';
 
   return (
     <Card style={styles.card} padded elevation="none">
       <View style={styles.eventRow}>
         <View style={styles.iconContainer}>
-          <Text style={styles.categoryIcon}>{icon}</Text>
+          <Ionicons name={icon} size={18} color={Colors.primary} />
         </View>
 
         <TouchableOpacity
@@ -163,9 +163,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: Spacing.md,
-  },
-  categoryIcon: {
-    fontSize: 18,
   },
   infoContainer: {
     flex: 1,
