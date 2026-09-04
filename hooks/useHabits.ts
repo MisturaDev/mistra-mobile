@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { haptics } from '@/utils/haptics';
 import type { Habit, HabitRow } from '@/types/dashboard';
 
 function mapHabit(row: HabitRow): Habit {
@@ -142,6 +143,12 @@ export function useHabits(userId: string | undefined) {
     if (!habit || toggleMutation.isPending) return;
 
     const wasCompleted = habit.completed;
+    if (!wasCompleted) {
+      haptics.notificationSuccess();
+    } else {
+      haptics.lightImpact();
+    }
+
     toggleMutation.mutate({
       id,
       completed: !wasCompleted,
@@ -149,9 +156,18 @@ export function useHabits(userId: string | undefined) {
     });
   };
 
-  const createHabit = (name: string) => createMutation.mutateAsync(name);
-  const updateHabit = (id: string, name: string) => updateMutation.mutateAsync({ id, name });
-  const deleteHabit = (id: string) => deleteMutation.mutateAsync(id);
+  const createHabit = (name: string) => {
+    haptics.mediumImpact();
+    return createMutation.mutateAsync(name);
+  };
+  const updateHabit = (id: string, name: string) => {
+    haptics.lightImpact();
+    return updateMutation.mutateAsync({ id, name });
+  };
+  const deleteHabit = (id: string) => {
+    haptics.notificationWarning();
+    return deleteMutation.mutateAsync(id);
+  };
 
   return {
     habits: query.data ?? [],

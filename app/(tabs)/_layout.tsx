@@ -3,12 +3,18 @@ import { Tabs } from 'expo-router';
 import { Colors } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useTabBarStyle } from '@/hooks/useTabBarStyle';
+import { haptics } from '@/utils/haptics';
 
 export default function TabsLayout() {
   const tabBarOptions = useTabBarStyle();
 
   return (
     <Tabs
+      screenListeners={{
+        tabPress: () => {
+          haptics.selection();
+        },
+      }}
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: Colors.primary,

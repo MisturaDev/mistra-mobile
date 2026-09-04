@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { haptics } from '@/utils/haptics';
 import type { Task, TaskPriority, TaskCategory, SubTask, TaskRow } from '@/types/dashboard';
 
 export interface CreateTaskInput {
@@ -240,16 +241,31 @@ export function useTasks(userId: string | undefined) {
   const toggleTask = (id: string) => {
     const task = query.data?.find((item) => item.id === id);
     if (!task || toggleMutation.isPending) return;
+    if (!task.completed) {
+      haptics.notificationSuccess();
+    } else {
+      haptics.lightImpact();
+    }
     toggleMutation.mutate({ id, completed: !task.completed });
   };
 
   const toggleSubtask = (taskId: string, subtaskId: string) => {
+    haptics.lightImpact();
     toggleSubtaskMutation.mutate({ taskId, subtaskId });
   };
 
-  const createTask = (input: string | CreateTaskInput) => createMutation.mutateAsync(input);
-  const updateTask = (input: UpdateTaskInput) => updateMutation.mutateAsync(input);
-  const deleteTask = (id: string) => deleteMutation.mutateAsync(id);
+  const createTask = (input: string | CreateTaskInput) => {
+    haptics.mediumImpact();
+    return createMutation.mutateAsync(input);
+  };
+  const updateTask = (input: UpdateTaskInput) => {
+    haptics.lightImpact();
+    return updateMutation.mutateAsync(input);
+  };
+  const deleteTask = (id: string) => {
+    haptics.notificationWarning();
+    return deleteMutation.mutateAsync(id);
+  };
 
   return {
     tasks: query.data ?? [],

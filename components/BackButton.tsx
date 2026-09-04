@@ -2,6 +2,7 @@ import React from 'react';
 import { TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Radius, Spacing } from '@/constants/theme';
+import { haptics } from '@/utils/haptics';
 
 interface BackButtonProps {
   onPress: () => void;
@@ -16,9 +17,14 @@ export function BackButton({
   iconName = 'chevron-back',
   size = 20,
 }: BackButtonProps) {
+  const handlePress = () => {
+    haptics.lightImpact();
+    onPress();
+  };
+
   return (
     <TouchableOpacity
-      onPress={onPress}
+      onPress={handlePress}
       style={[styles.button, style]}
       activeOpacity={0.7}
       hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
