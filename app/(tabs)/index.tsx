@@ -283,7 +283,7 @@ export default function HomeDashboardScreen() {
                 </TouchableOpacity>
                 <Avatar
                   uri={avatarUri}
-                  name={firstName}
+                  name={userName}
                   size={38}
                   onPress={() => router.push('/(tabs)/profile')}
                 />
