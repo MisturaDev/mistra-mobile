@@ -23,6 +23,8 @@ import { NoteItem } from '@/features/dashboard/NoteItem';
 import { TaskFormModal, TaskFormData } from '@/components/TaskFormModal';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { toast } from '@/components/AppToast';
+import { useNotificationsFeedStore } from '@/store/useNotificationsFeedStore';
+import { haptics } from '@/utils/haptics';
 import type { Task, TaskPriority, TaskCategory, SubTask } from '@/types/dashboard';
 
 const HABIT_PREVIEW_LIMIT = 3;
@@ -121,6 +123,23 @@ export default function HomeDashboardScreen() {
     isError: eventsError,
     refetch: refetchEvents,
   } = useEvents(userId);
+
+  const {
+    unreadCount,
+    isHydrated: notificationsHydrated,
+    hydrate: hydrateNotifications,
+    syncFromDashboard,
+  } = useNotificationsFeedStore();
+
+  React.useEffect(() => {
+    hydrateNotifications();
+  }, [hydrateNotifications]);
+
+  React.useEffect(() => {
+    if (notificationsHydrated) {
+      syncFromDashboard({ tasks, habits, events });
+    }
+  }, [notificationsHydrated, tasks, habits, events, syncFromDashboard]);
 
   const todayString = useMemo(() => new Date().toISOString().split('T')[0], []);
   const todayEvents = useMemo(() => {
@@ -251,12 +270,16 @@ export default function HomeDashboardScreen() {
             right={
               <View style={styles.headerRightRow}>
                 <TouchableOpacity
-                  onPress={() => router.push('/notifications')}
-                  style={styles.calendarHeaderButton}
+                  onPress={() => {
+                    haptics.lightImpact();
+                    router.push('/notifications');
+                  }}
+                  style={styles.notificationHeaderButton}
                   activeOpacity={0.7}
                   accessibilityLabel="Open Notifications"
                 >
-                  <Ionicons name="notifications-outline" size={20} color={Colors.primary} />
+                  <Ionicons name="notifications-outline" size={20} color={Colors.text} />
+                  {unreadCount > 0 && <View style={styles.notificationDot} />}
                 </TouchableOpacity>
                 <Avatar
                   uri={avatarUri}
@@ -551,15 +574,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.sm,
   },
-  calendarHeaderButton: {
-    width: 44,
-    height: 44,
+  notificationHeaderButton: {
+    width: 40,
+    height: 40,
     borderRadius: Radius.full,
     backgroundColor: Colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: Colors.borderLight,
+    borderColor: Colors.border,
+    position: 'relative',
+  },
+  notificationDot: {
+    position: 'absolute',
+    top: 7,
+    right: 7,
+    width: 8,
+    height: 8,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.error,
+    borderWidth: 1.5,
+    borderColor: Colors.white,
   },
   eventsList: {
     gap: Spacing.sm,
