@@ -41,7 +41,7 @@ function getGreeting() {
 function getFormattedDate() {
   return new Date().toLocaleDateString('en-US', {
     weekday: 'long',
-    month: 'short',
+    month: 'long',
     day: 'numeric',
   });
 }
@@ -64,7 +64,7 @@ function formatRelativeTime(dateString: string) {
 
 function getProgressMessage(percentage: number) {
   if (percentage >= 100) return 'You cleared today. Nice work.';
-  if (percentage >= 75) return 'Almost there — strong finish ahead.';
+  if (percentage >= 75) return 'Almost there. Strong finish ahead.';
   if (percentage >= 40) return 'Solid pace. Keep going.';
   return 'Small steps add up. Start with one win.';
 }
@@ -278,14 +278,13 @@ export default function HomeDashboardScreen() {
                   activeOpacity={0.7}
                   accessibilityLabel="Open Notifications"
                 >
-                  <Ionicons name="notifications-outline" size={20} color={Colors.text} />
+                  <Ionicons name="notifications-outline" size={19} color={Colors.text} />
                   {unreadCount > 0 && <View style={styles.notificationDot} />}
                 </TouchableOpacity>
                 <Avatar
                   uri={avatarUri}
                   name={firstName}
-                  size={44}
-                  showRing
+                  size={38}
                   onPress={() => router.push('/(tabs)/profile')}
                 />
               </View>
@@ -486,7 +485,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   scrollContainer: {
-    paddingHorizontal: Spacing.xl,
+    paddingHorizontal: Spacing.lg,
   },
   content: {
     gap: 0,
@@ -572,11 +571,11 @@ const styles = StyleSheet.create({
   headerRightRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.sm,
+    gap: 6,
   },
   notificationHeaderButton: {
-    width: 40,
-    height: 40,
+    width: 38,
+    height: 38,
     borderRadius: Radius.full,
     backgroundColor: Colors.surface,
     alignItems: 'center',
@@ -587,8 +586,8 @@ const styles = StyleSheet.create({
   },
   notificationDot: {
     position: 'absolute',
-    top: 7,
-    right: 7,
+    top: 6,
+    right: 6,
     width: 8,
     height: 8,
     borderRadius: Radius.full,
