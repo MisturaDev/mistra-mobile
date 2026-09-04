@@ -42,7 +42,17 @@ interface EventFormModalProps {
   onSubmit: (data: EventFormData) => void;
 }
 
-const TIME_PRESETS = ['09:00 AM', '10:00 AM', '11:30 AM', '02:00 PM', '04:00 PM', '06:00 PM'];
+const TIME_PRESETS = [
+  '08:00 AM',
+  '09:00 AM',
+  '10:00 AM',
+  '11:30 AM',
+  '01:00 PM',
+  '02:00 PM',
+  '04:00 PM',
+  '06:00 PM',
+  '08:00 PM',
+];
 
 export function EventFormModal({
   visible,
@@ -144,10 +154,19 @@ export function EventFormModal({
         </TouchableOpacity>
       </View>
 
-      {/* Time Presets (if not all day) */}
+      {/* Start Time Field & Quick Presets (if not all day) */}
       {!isAllDay ? (
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Start Time</Text>
+          <Input
+            label="Start Time"
+            placeholder="e.g. 09:30 AM, 02:15 PM"
+            value={startTime || ''}
+            onChangeText={(val) => setStartTime(val)}
+            iconName="time-outline"
+            disabled={loading}
+            containerStyle={styles.timeInputContainer}
+          />
+          <Text style={styles.presetsLabel}>Quick Presets</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
             {TIME_PRESETS.map((t) => {
               const isSelected = startTime === t;
@@ -214,6 +233,17 @@ const styles = StyleSheet.create({
     ...Typography.captionBold,
     color: Colors.textSecondary,
     marginBottom: Spacing.xs,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  timeInputContainer: {
+    marginBottom: Spacing.xs,
+  },
+  presetsLabel: {
+    ...Typography.captionBold,
+    fontSize: 11,
+    color: Colors.textSecondary,
+    marginBottom: 4,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
