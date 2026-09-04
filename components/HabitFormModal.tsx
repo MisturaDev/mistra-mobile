@@ -63,7 +63,6 @@ export function HabitFormModal({
         disabled={loading}
         returnKeyType="done"
         onSubmitEditing={handleSubmit}
-        iconName="sparkles-outline"
       />
       <View style={styles.actions}>
         <Button
