@@ -274,11 +274,11 @@ export default function HomeDashboardScreen() {
                     haptics.lightImpact();
                     router.push('/notifications');
                   }}
-                  style={styles.calendarHeaderButton}
+                  style={styles.notificationHeaderButton}
                   activeOpacity={0.7}
                   accessibilityLabel="Open Notifications"
                 >
-                  <Ionicons name="notifications-outline" size={20} color={Colors.primary} />
+                  <Ionicons name="notifications-outline" size={20} color={Colors.text} />
                   {unreadCount > 0 && <View style={styles.notificationDot} />}
                 </TouchableOpacity>
                 <Avatar
@@ -574,25 +574,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.sm,
   },
-  calendarHeaderButton: {
-    width: 44,
-    height: 44,
+  notificationHeaderButton: {
+    width: 40,
+    height: 40,
     borderRadius: Radius.full,
     backgroundColor: Colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: Colors.borderLight,
+    borderColor: Colors.border,
     position: 'relative',
   },
   notificationDot: {
     position: 'absolute',
-    top: 9,
-    right: 9,
-    width: 9,
-    height: 9,
+    top: 7,
+    right: 7,
+    width: 8,
+    height: 8,
     borderRadius: Radius.full,
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.error,
     borderWidth: 1.5,
     borderColor: Colors.white,
   },
