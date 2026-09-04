@@ -43,13 +43,13 @@ const PRIORITIES: { key: TaskPriority; label: string; color: string; bg: string 
   { key: 'high', label: 'High', color: '#DC2626', bg: '#FEE2E2' },
 ];
 
-const CATEGORIES: { key: TaskCategory; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
-  { key: 'general', label: 'General', icon: 'pricetag-outline' },
-  { key: 'work', label: 'Work', icon: 'briefcase-outline' },
-  { key: 'personal', label: 'Personal', icon: 'home-outline' },
-  { key: 'study', label: 'Study', icon: 'book-outline' },
-  { key: 'health', label: 'Health', icon: 'fitness-outline' },
-  { key: 'shopping', label: 'Shopping', icon: 'cart-outline' },
+const CATEGORIES: { key: TaskCategory; label: string }[] = [
+  { key: 'general', label: 'General' },
+  { key: 'work', label: 'Work' },
+  { key: 'personal', label: 'Personal' },
+  { key: 'study', label: 'Study' },
+  { key: 'health', label: 'Health' },
+  { key: 'shopping', label: 'Shopping' },
 ];
 
 const DUE_DATE_OPTIONS: { key: string; label: string; getDate: () => string | null }[] = [
@@ -171,7 +171,7 @@ export function TaskFormModal({
         disabled={loading}
       />
 
-      {/* Category Selector */}
+      {/* Category Selector (clean text-only pills) */}
       <View style={styles.section}>
         <Text style={styles.sectionLabel}>Category</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
@@ -184,11 +184,6 @@ export function TaskFormModal({
                 style={[styles.categoryChip, isSelected && styles.categoryChipSelected]}
                 activeOpacity={0.7}
               >
-                <Ionicons
-                  name={cat.icon}
-                  size={14}
-                  color={isSelected ? Colors.primary : Colors.textSecondary}
-                />
                 <Text style={[styles.categoryText, isSelected && styles.categoryTextSelected]}>
                   {cat.label}
                 </Text>
@@ -339,15 +334,14 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.xs,
   },
   categoryChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs,
     borderRadius: Radius.full,
     backgroundColor: Colors.surface,
     borderWidth: 1,
     borderColor: Colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   categoryChipSelected: {
     backgroundColor: Colors.primaryLight,

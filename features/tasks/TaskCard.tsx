@@ -15,14 +15,14 @@ interface TaskCardProps {
 
 const CATEGORY_META: Record<
   TaskCategory,
-  { label: string; icon: keyof typeof Ionicons.glyphMap; color: string; bg: string }
+  { label: string; color: string; bg: string }
 > = {
-  general: { label: 'General', icon: 'pricetag-outline', color: '#4B5563', bg: '#F3F4F6' },
-  work: { label: 'Work', icon: 'briefcase-outline', color: '#1D4ED8', bg: '#EFF6FF' },
-  personal: { label: 'Personal', icon: 'home-outline', color: '#7C3AED', bg: '#F5F3FF' },
-  study: { label: 'Study', icon: 'book-outline', color: '#D97706', bg: '#FEF3C7' },
-  health: { label: 'Health', icon: 'fitness-outline', color: '#059669', bg: '#D1FAE5' },
-  shopping: { label: 'Shopping', icon: 'cart-outline', color: '#DC2626', bg: '#FEE2E2' },
+  general: { label: 'General', color: '#4B5563', bg: '#F3F4F6' },
+  work: { label: 'Work', color: '#1D4ED8', bg: '#EFF6FF' },
+  personal: { label: 'Personal', color: '#7C3AED', bg: '#F5F3FF' },
+  study: { label: 'Study', color: '#D97706', bg: '#FEF3C7' },
+  health: { label: 'Health', color: '#059669', bg: '#D1FAE5' },
+  shopping: { label: 'Shopping', color: '#DC2626', bg: '#FEE2E2' },
 };
 
 const PRIORITY_META: Record<TaskPriority, { label: string; color: string; bg: string } | null> = {
@@ -142,9 +142,8 @@ export function TaskCard({
 
           {/* Badges Row */}
           <View style={styles.badgesRow}>
-            {/* Category Badge */}
+            {/* Category Badge (Clean Text-Only Pill) */}
             <View style={[styles.categoryBadge, { backgroundColor: cat.bg }]}>
-              <Ionicons name={cat.icon} size={11} color={cat.color} />
               <Text style={[styles.categoryLabel, { color: cat.color }]}>{cat.label}</Text>
             </View>
 
@@ -314,12 +313,11 @@ const styles = StyleSheet.create({
     marginTop: Spacing.xs,
   },
   categoryBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
     paddingHorizontal: 8,
-    paddingVertical: 2.5,
+    paddingVertical: 2,
     borderRadius: Radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   categoryLabel: {
     fontSize: 11,
