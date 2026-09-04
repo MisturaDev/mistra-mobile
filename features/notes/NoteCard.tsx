@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Card } from '@/components/Card';
 import { Colors, Spacing, Radius, Typography } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
-import { NoteIcon } from '@/components/NoteIcon';
 import type { Note } from '@/types/dashboard';
 
 interface NoteCardProps {
@@ -52,14 +51,9 @@ export function NoteCard({ note, onPress, onTogglePin, onDelete }: NoteCardProps
         style={styles.touchArea}
       >
         <View style={styles.header}>
-          <View style={styles.titleContainer}>
-            <View style={styles.iconContainer}>
-              <NoteIcon name={note.emoji || 'document-text-outline'} size={16} color={Colors.primary} />
-            </View>
-            <Text style={styles.title} numberOfLines={1}>
-              {note.title}
-            </Text>
-          </View>
+          <Text style={styles.title} numberOfLines={1}>
+            {note.title}
+          </Text>
 
           <View style={styles.actions}>
             <TouchableOpacity
@@ -125,20 +119,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: Spacing.xs,
     gap: Spacing.sm,
-  },
-  titleContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
-  },
-  iconContainer: {
-    width: 28,
-    height: 28,
-    borderRadius: Radius.sm,
-    backgroundColor: Colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   title: {
     ...Typography.title,

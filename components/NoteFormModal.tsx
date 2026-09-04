@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   TextInput,
   TouchableOpacity,
 } from 'react-native';
@@ -12,7 +11,6 @@ import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
 import { Ionicons } from '@expo/vector-icons';
 import { BottomSheetWrapper } from '@/components/BottomSheetWrapper';
-import { NOTE_ICON_OPTIONS } from '@/components/NoteIcon';
 
 export interface NoteFormData {
   title: string;
@@ -46,7 +44,6 @@ export function NoteFormModal({
 }: NoteFormModalProps) {
   const [title, setTitle] = useState(initialTitle);
   const [content, setContent] = useState(initialContent);
-  const [emoji, setEmoji] = useState(initialEmoji);
   const [isPinned, setIsPinned] = useState(initialIsPinned);
   const [error, setError] = useState('');
 
@@ -54,11 +51,10 @@ export function NoteFormModal({
     if (visible) {
       setTitle(initialTitle);
       setContent(initialContent);
-      setEmoji(initialEmoji || 'document-text-outline');
       setIsPinned(initialIsPinned);
       setError('');
     }
-  }, [visible, initialTitle, initialContent, initialEmoji, initialIsPinned]);
+  }, [visible, initialTitle, initialContent, initialIsPinned]);
 
   const handleSubmit = () => {
     const trimmedTitle = title.trim();
@@ -70,7 +66,7 @@ export function NoteFormModal({
     onSubmit({
       title: trimmedTitle,
       content: content.trim(),
-      emoji,
+      emoji: initialEmoji || 'document-text-outline',
       isPinned,
     });
   };
@@ -105,34 +101,6 @@ export function NoteFormModal({
       scrollable
       maxHeight="92%"
     >
-      {/* Vector Icon Selector */}
-      <View style={styles.iconSection}>
-        <Text style={styles.sectionLabel}>Icon</Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.iconRow}
-        >
-          {NOTE_ICON_OPTIONS.map((item) => {
-            const isSelected = item.key === emoji || item.iconName === emoji;
-            return (
-              <TouchableOpacity
-                key={item.key}
-                onPress={() => setEmoji(item.iconName)}
-                style={[styles.iconOption, isSelected && styles.iconOptionSelected]}
-                activeOpacity={0.7}
-              >
-                <Ionicons
-                  name={item.iconName}
-                  size={19}
-                  color={isSelected ? Colors.primary : Colors.textSecondary}
-                />
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-      </View>
-
       {/* Title Input */}
       <Input
         label="Title"
@@ -212,36 +180,6 @@ const styles = StyleSheet.create({
   },
   pinToggleTextActive: {
     color: Colors.primary,
-  },
-  iconSection: {
-    marginBottom: Spacing.md,
-  },
-  sectionLabel: {
-    ...Typography.captionBold,
-    color: Colors.textSecondary,
-    marginBottom: Spacing.xs,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  iconRow: {
-    flexDirection: 'row',
-    gap: Spacing.xs,
-    paddingVertical: Spacing.xs,
-  },
-  iconOption: {
-    width: 40,
-    height: 40,
-    borderRadius: Radius.md,
-    backgroundColor: Colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
-  },
-  iconOptionSelected: {
-    backgroundColor: Colors.primaryLight,
-    borderColor: Colors.primary,
-    transform: [{ scale: 1.05 }],
   },
   contentSection: {
     marginTop: Spacing.xs,
