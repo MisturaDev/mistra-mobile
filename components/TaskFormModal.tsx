@@ -1,12 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Modal,
   View,
   Text,
   StyleSheet,
-  Pressable,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
   TextInput,
   TouchableOpacity,
@@ -15,6 +11,7 @@ import { Colors, Spacing, Radius, Typography } from '@/constants/theme';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
 import { Ionicons } from '@expo/vector-icons';
+import { BottomSheetWrapper } from '@/components/BottomSheetWrapper';
 import type { TaskPriority, TaskCategory, SubTask } from '@/types/dashboard';
 
 export interface TaskFormData {
@@ -151,204 +148,177 @@ export function TaskFormModal({
   };
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable style={styles.overlay} onPress={loading ? undefined : onClose}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          style={styles.keyboardView}
-        >
-          <Pressable style={styles.card} onPress={(event) => event.stopPropagation()}>
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-              contentContainerStyle={styles.scrollContent}
-            >
-              <Text style={styles.title}>{mode === 'create' ? 'New Task' : 'Edit Task'}</Text>
+    <BottomSheetWrapper
+      visible={visible}
+      onClose={onClose}
+      title={mode === 'create' ? 'New Task' : 'Edit Task'}
+      subtitle={mode === 'create' ? 'Add an actionable task to your list' : 'Update your task details'}
+      loading={loading}
+      scrollable
+      maxHeight="92%"
+    >
+      {/* Title Input */}
+      <Input
+        label="Task Title"
+        placeholder="What needs to be done?"
+        value={title}
+        onChangeText={(value) => {
+          setTitle(value);
+          if (error) setError('');
+        }}
+        error={error}
+        autoFocus={mode === 'create'}
+        disabled={loading}
+      />
 
-              {/* Title Input */}
-              <Input
-                label="Task Title"
-                placeholder="What needs to be done?"
-                value={title}
-                onChangeText={(value) => {
-                  setTitle(value);
-                  if (error) setError('');
-                }}
-                error={error}
-                autoFocus={mode === 'create'}
-                disabled={loading}
-              />
+      {/* Category Selector */}
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>Category</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
+          {CATEGORIES.map((cat) => {
+            const isSelected = category === cat.key;
+            return (
+              <TouchableOpacity
+                key={cat.key}
+                onPress={() => setCategory(cat.key)}
+                style={[styles.categoryChip, isSelected && styles.categoryChipSelected]}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.categoryIcon}>{cat.icon}</Text>
+                <Text style={[styles.categoryText, isSelected && styles.categoryTextSelected]}>
+                  {cat.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      </View>
 
-              {/* Category Selector */}
-              <View style={styles.section}>
-                <Text style={styles.sectionLabel}>Category</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
-                  {CATEGORIES.map((cat) => {
-                    const isSelected = category === cat.key;
-                    return (
-                      <TouchableOpacity
-                        key={cat.key}
-                        onPress={() => setCategory(cat.key)}
-                        style={[styles.categoryChip, isSelected && styles.categoryChipSelected]}
-                        activeOpacity={0.7}
-                      >
-                        <Text style={styles.categoryIcon}>{cat.icon}</Text>
-                        <Text style={[styles.categoryText, isSelected && styles.categoryTextSelected]}>
-                          {cat.label}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </ScrollView>
-              </View>
+      {/* Priority Selector */}
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>Priority</Text>
+        <View style={styles.priorityRow}>
+          {PRIORITIES.map((p) => {
+            const isSelected = priority === p.key;
+            return (
+              <TouchableOpacity
+                key={p.key}
+                onPress={() => setPriority(p.key)}
+                style={[
+                  styles.priorityChip,
+                  { backgroundColor: isSelected ? p.bg : Colors.surface },
+                  isSelected && { borderColor: p.color, borderWidth: 1.5 },
+                ]}
+                activeOpacity={0.7}
+              >
+                <Text
+                  style={[
+                    styles.priorityChipText,
+                    { color: isSelected ? p.color : Colors.textSecondary },
+                    isSelected && { fontWeight: '700' },
+                  ]}
+                >
+                  {p.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </View>
 
-              {/* Priority Selector */}
-              <View style={styles.section}>
-                <Text style={styles.sectionLabel}>Priority</Text>
-                <View style={styles.priorityRow}>
-                  {PRIORITIES.map((p) => {
-                    const isSelected = priority === p.key;
-                    return (
-                      <TouchableOpacity
-                        key={p.key}
-                        onPress={() => setPriority(p.key)}
-                        style={[
-                          styles.priorityChip,
-                          { backgroundColor: isSelected ? p.bg : Colors.surface },
-                          isSelected && { borderColor: p.color, borderWidth: 1.5 },
-                        ]}
-                        activeOpacity={0.7}
-                      >
-                        <Text style={[styles.priorityChipText, { color: isSelected ? p.color : Colors.textSecondary }, isSelected && { fontWeight: '700' }]}>
-                          {p.label}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
-              </View>
+      {/* Due Date Selector */}
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>Due Date</Text>
+        <View style={styles.dateRow}>
+          {DUE_DATE_OPTIONS.map((opt) => {
+            const targetDate = opt.getDate();
+            const isSelected =
+              (dueDate === null && opt.key === 'none') || (dueDate !== null && dueDate === targetDate);
+            return (
+              <TouchableOpacity
+                key={opt.key}
+                onPress={() => setDueDate(targetDate)}
+                style={[styles.dateChip, isSelected && styles.dateChipSelected]}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.dateText, isSelected && styles.dateTextSelected]}>
+                  {opt.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </View>
 
-              {/* Due Date Selector */}
-              <View style={styles.section}>
-                <Text style={styles.sectionLabel}>Due Date</Text>
-                <View style={styles.dateRow}>
-                  {DUE_DATE_OPTIONS.map((opt) => {
-                    const targetDate = opt.getDate();
-                    const isSelected = (dueDate === null && opt.key === 'none') || (dueDate !== null && dueDate === targetDate);
-                    return (
-                      <TouchableOpacity
-                        key={opt.key}
-                        onPress={() => setDueDate(targetDate)}
-                        style={[styles.dateChip, isSelected && styles.dateChipSelected]}
-                        activeOpacity={0.7}
-                      >
-                        <Text style={[styles.dateText, isSelected && styles.dateTextSelected]}>
-                          {opt.label}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
-              </View>
+      {/* Subtasks Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>Subtasks</Text>
+        {subtasks.map((st) => (
+          <View key={st.id} style={styles.subtaskItem}>
+            <Ionicons name="checkbox-outline" size={16} color={Colors.primary} />
+            <Text style={styles.subtaskItemTitle} numberOfLines={1}>
+              {st.title}
+            </Text>
+            <TouchableOpacity onPress={() => handleRemoveSubtask(st.id)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <Ionicons name="close" size={16} color={Colors.textLight} />
+            </TouchableOpacity>
+          </View>
+        ))}
+        <View style={styles.addSubtaskRow}>
+          <TextInput
+            style={styles.subtaskInput}
+            placeholder="Add a step or subtask..."
+            placeholderTextColor={Colors.textLight}
+            value={newSubtaskTitle}
+            onChangeText={setNewSubtaskTitle}
+            returnKeyType="done"
+            onSubmitEditing={handleAddSubtask}
+          />
+          <TouchableOpacity onPress={handleAddSubtask} style={styles.addSubtaskButton} activeOpacity={0.7}>
+            <Ionicons name="add" size={20} color={Colors.white} />
+          </TouchableOpacity>
+        </View>
+      </View>
 
-              {/* Subtasks Section */}
-              <View style={styles.section}>
-                <Text style={styles.sectionLabel}>Subtasks</Text>
-                {subtasks.map((st) => (
-                  <View key={st.id} style={styles.subtaskItem}>
-                    <Ionicons name="checkbox-outline" size={16} color={Colors.primary} />
-                    <Text style={styles.subtaskItemTitle} numberOfLines={1}>
-                      {st.title}
-                    </Text>
-                    <TouchableOpacity onPress={() => handleRemoveSubtask(st.id)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                      <Ionicons name="close" size={16} color={Colors.textLight} />
-                    </TouchableOpacity>
-                  </View>
-                ))}
-                <View style={styles.addSubtaskRow}>
-                  <TextInput
-                    style={styles.subtaskInput}
-                    placeholder="Add a step or subtask..."
-                    placeholderTextColor={Colors.textLight}
-                    value={newSubtaskTitle}
-                    onChangeText={setNewSubtaskTitle}
-                    returnKeyType="done"
-                    onSubmitEditing={handleAddSubtask}
-                  />
-                  <TouchableOpacity onPress={handleAddSubtask} style={styles.addSubtaskButton} activeOpacity={0.7}>
-                    <Ionicons name="add" size={20} color={Colors.white} />
-                  </TouchableOpacity>
-                </View>
-              </View>
+      {/* Description & Notes */}
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>Notes & Description (Optional)</Text>
+        <TextInput
+          style={styles.descriptionInput}
+          placeholder="Additional context, links, or notes..."
+          placeholderTextColor={Colors.textLight}
+          value={description}
+          onChangeText={setDescription}
+          multiline
+          numberOfLines={3}
+          textAlignVertical="top"
+        />
+      </View>
 
-              {/* Description & Notes */}
-              <View style={styles.section}>
-                <Text style={styles.sectionLabel}>Notes & Description (Optional)</Text>
-                <TextInput
-                  style={styles.descriptionInput}
-                  placeholder="Additional context, links, or notes..."
-                  placeholderTextColor={Colors.textLight}
-                  value={description}
-                  onChangeText={setDescription}
-                  multiline
-                  numberOfLines={3}
-                  textAlignVertical="top"
-                />
-              </View>
-
-              {/* Actions */}
-              <View style={styles.actions}>
-                <Button
-                  title="Cancel"
-                  variant="outline"
-                  size="md"
-                  onPress={onClose}
-                  disabled={loading}
-                  style={styles.actionButton}
-                />
-                <Button
-                  title={mode === 'create' ? 'Create Task' : 'Save Changes'}
-                  variant="primary"
-                  size="md"
-                  loading={loading}
-                  onPress={handleSubmit}
-                  style={styles.actionButton}
-                />
-              </View>
-            </ScrollView>
-          </Pressable>
-        </KeyboardAvoidingView>
-      </Pressable>
-    </Modal>
+      {/* Actions */}
+      <View style={styles.actions}>
+        <Button
+          title="Cancel"
+          variant="outline"
+          size="md"
+          onPress={onClose}
+          disabled={loading}
+          style={styles.actionButton}
+        />
+        <Button
+          title={mode === 'create' ? 'Create Task' : 'Save Changes'}
+          variant="primary"
+          size="md"
+          loading={loading}
+          onPress={handleSubmit}
+          style={styles.actionButton}
+        />
+      </View>
+    </BottomSheetWrapper>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(17, 24, 39, 0.45)',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.xxl,
-  },
-  keyboardView: {
-    width: '100%',
-    maxHeight: '90%',
-  },
-  card: {
-    backgroundColor: Colors.white,
-    borderRadius: Radius.xl,
-    padding: Spacing.xl,
-    maxHeight: '100%',
-  },
-  scrollContent: {
-    flexGrow: 1,
-  },
-  title: {
-    ...Typography.h2,
-    color: Colors.text,
-    marginBottom: Spacing.md,
-  },
   section: {
     marginBottom: Spacing.md,
   },
@@ -488,7 +458,7 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: 'row',
     gap: Spacing.sm,
-    marginTop: Spacing.sm,
+    marginTop: Spacing.md,
   },
   actionButton: {
     flex: 1,

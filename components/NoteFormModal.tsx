@@ -1,12 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Modal,
   View,
   Text,
   StyleSheet,
-  Pressable,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
   TextInput,
   TouchableOpacity,
@@ -15,6 +11,7 @@ import { Colors, Spacing, Radius, Typography } from '@/constants/theme';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
 import { Ionicons } from '@expo/vector-icons';
+import { BottomSheetWrapper } from '@/components/BottomSheetWrapper';
 
 const EMOJI_OPTIONS = ['📝', '💡', '🎯', '📌', '🚀', '📚', '☕', '✨', '💼', '🏷️', '💭', '🔑'];
 
@@ -79,163 +76,127 @@ export function NoteFormModal({
     });
   };
 
+  const headerRightElement = (
+    <TouchableOpacity
+      onPress={() => setIsPinned(!isPinned)}
+      style={[styles.pinToggle, isPinned && styles.pinToggleActive]}
+      activeOpacity={0.7}
+      accessibilityRole="button"
+      accessibilityLabel={isPinned ? 'Unpin note' : 'Pin note to top'}
+    >
+      <Ionicons
+        name={isPinned ? 'pin' : 'pin-outline'}
+        size={14}
+        color={isPinned ? Colors.primary : Colors.textSecondary}
+      />
+      <Text style={[styles.pinToggleText, isPinned && styles.pinToggleTextActive]}>
+        {isPinned ? 'Pinned' : 'Pin'}
+      </Text>
+    </TouchableOpacity>
+  );
+
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable style={styles.overlay} onPress={loading ? undefined : onClose}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          style={styles.keyboardView}
+    <BottomSheetWrapper
+      visible={visible}
+      onClose={onClose}
+      title={mode === 'create' ? 'New Note' : 'Edit Note'}
+      subtitle={mode === 'create' ? 'Capture quick thoughts, ideas, or references' : 'Update note content'}
+      headerRight={headerRightElement}
+      loading={loading}
+      scrollable
+      maxHeight="92%"
+    >
+      {/* Emoji Selector */}
+      <View style={styles.emojiSection}>
+        <Text style={styles.sectionLabel}>Icon</Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.emojiRow}
         >
-          <Pressable style={styles.card} onPress={(event) => event.stopPropagation()}>
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-              contentContainerStyle={styles.scrollContent}
-            >
-              <View style={styles.header}>
-                <Text style={styles.title}>{mode === 'create' ? 'New Note' : 'Edit Note'}</Text>
-                <TouchableOpacity
-                  onPress={() => setIsPinned(!isPinned)}
-                  style={[styles.pinToggle, isPinned && styles.pinToggleActive]}
-                  activeOpacity={0.7}
-                  accessibilityRole="button"
-                  accessibilityLabel={isPinned ? 'Unpin note' : 'Pin note to top'}
-                >
-                  <Ionicons
-                    name={isPinned ? 'pin' : 'pin-outline'}
-                    size={16}
-                    color={isPinned ? Colors.primary : Colors.textSecondary}
-                  />
-                  <Text style={[styles.pinToggleText, isPinned && styles.pinToggleTextActive]}>
-                    {isPinned ? 'Pinned' : 'Pin'}
-                  </Text>
-                </TouchableOpacity>
-              </View>
+          {EMOJI_OPTIONS.map((item) => {
+            const isSelected = item === emoji;
+            return (
+              <TouchableOpacity
+                key={item}
+                onPress={() => setEmoji(item)}
+                style={[styles.emojiOption, isSelected && styles.emojiOptionSelected]}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.emojiText}>{item}</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      </View>
 
-              {/* Emoji Selector */}
-              <View style={styles.emojiSection}>
-                <Text style={styles.sectionLabel}>Icon</Text>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.emojiRow}
-                >
-                  {EMOJI_OPTIONS.map((item) => {
-                    const isSelected = item === emoji;
-                    return (
-                      <TouchableOpacity
-                        key={item}
-                        onPress={() => setEmoji(item)}
-                        style={[styles.emojiOption, isSelected && styles.emojiOptionSelected]}
-                        activeOpacity={0.7}
-                      >
-                        <Text style={styles.emojiText}>{item}</Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </ScrollView>
-              </View>
+      {/* Title Input */}
+      <Input
+        label="Title"
+        placeholder="Give your note a name..."
+        value={title}
+        onChangeText={(val) => {
+          setTitle(val);
+          if (error) setError('');
+        }}
+        error={error}
+        disabled={loading}
+        autoFocus={mode === 'create'}
+      />
 
-              {/* Title Input */}
-              <Input
-                label="Title"
-                placeholder="Give your note a name..."
-                value={title}
-                onChangeText={(val) => {
-                  setTitle(val);
-                  if (error) setError('');
-                }}
-                error={error}
-                disabled={loading}
-                autoFocus={mode === 'create'}
-              />
+      {/* Content Multiline Area */}
+      <View style={styles.contentSection}>
+        <Text style={styles.contentLabel}>Notes & Details</Text>
+        <View style={styles.textAreaContainer}>
+          <TextInput
+            style={styles.textArea}
+            placeholder="Write your thoughts, checklist, or ideas..."
+            placeholderTextColor={Colors.textLight}
+            multiline
+            numberOfLines={6}
+            textAlignVertical="top"
+            value={content}
+            onChangeText={setContent}
+            editable={!loading}
+          />
+        </View>
+      </View>
 
-              {/* Content Multiline Area */}
-              <View style={styles.contentSection}>
-                <Text style={styles.contentLabel}>Notes & Details</Text>
-                <View style={styles.textAreaContainer}>
-                  <TextInput
-                    style={styles.textArea}
-                    placeholder="Write your thoughts, checklist, or ideas..."
-                    placeholderTextColor={Colors.textLight}
-                    multiline
-                    numberOfLines={6}
-                    textAlignVertical="top"
-                    value={content}
-                    onChangeText={setContent}
-                    editable={!loading}
-                  />
-                </View>
-              </View>
-
-              {/* Action Buttons */}
-              <View style={styles.actions}>
-                <Button
-                  title="Cancel"
-                  variant="outline"
-                  size="md"
-                  onPress={onClose}
-                  disabled={loading}
-                  style={styles.actionButton}
-                />
-                <Button
-                  title={mode === 'create' ? 'Create Note' : 'Save Changes'}
-                  variant="primary"
-                  size="md"
-                  loading={loading}
-                  onPress={handleSubmit}
-                  style={styles.actionButton}
-                />
-              </View>
-            </ScrollView>
-          </Pressable>
-        </KeyboardAvoidingView>
-      </Pressable>
-    </Modal>
+      {/* Action Buttons */}
+      <View style={styles.actions}>
+        <Button
+          title="Cancel"
+          variant="outline"
+          size="md"
+          onPress={onClose}
+          disabled={loading}
+          style={styles.actionButton}
+        />
+        <Button
+          title={mode === 'create' ? 'Create Note' : 'Save Changes'}
+          variant="primary"
+          size="md"
+          loading={loading}
+          onPress={handleSubmit}
+          style={styles.actionButton}
+        />
+      </View>
+    </BottomSheetWrapper>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(17, 24, 39, 0.45)',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.xxl,
-  },
-  keyboardView: {
-    width: '100%',
-    maxHeight: '90%',
-  },
-  card: {
-    backgroundColor: Colors.white,
-    borderRadius: Radius.xl,
-    padding: Spacing.xl,
-    maxHeight: '100%',
-  },
-  scrollContent: {
-    flexGrow: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: Spacing.md,
-  },
-  title: {
-    ...Typography.h2,
-    color: Colors.text,
-  },
   pinToggle: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     backgroundColor: Colors.surface,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 4,
     borderRadius: Radius.full,
     borderWidth: 1,
     borderColor: Colors.border,
+    marginRight: 4,
   },
   pinToggleActive: {
     backgroundColor: Colors.primaryLight,
@@ -243,6 +204,7 @@ const styles = StyleSheet.create({
   },
   pinToggleText: {
     ...Typography.captionBold,
+    fontSize: 11,
     color: Colors.textSecondary,
   },
   pinToggleTextActive: {
