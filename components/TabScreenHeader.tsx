@@ -37,6 +37,7 @@ interface DashboardTabHeaderProps {
   greeting: string;
   firstName: string;
   date: string;
+  subtitle?: string;
   right?: ReactNode;
   style?: StyleProp<ViewStyle>;
 }
@@ -50,15 +51,17 @@ export function DashboardTabHeader({
 }: DashboardTabHeaderProps) {
   return (
     <TabHeaderShell style={style}>
-      <View style={styles.headerRow}>
-        <View style={styles.textWrap}>
-          <Text style={styles.greetingText} numberOfLines={2}>
+      <View style={styles.dashboardHeaderRow}>
+        <View style={styles.dashboardTextWrap}>
+          <Text style={styles.greetingText} numberOfLines={1}>
             {`${greeting}, `}
             <Text style={styles.nameHighlight}>{firstName}</Text>
           </Text>
-          <Text style={styles.meta}>{date}</Text>
+          <Text style={styles.dateText} numberOfLines={1}>
+            {date}
+          </Text>
         </View>
-        {right ? <View style={styles.right}>{right}</View> : null}
+        {right ? <View style={styles.dashboardRight}>{right}</View> : null}
       </View>
     </TabHeaderShell>
   );
@@ -66,11 +69,9 @@ export function DashboardTabHeader({
 
 const styles = StyleSheet.create({
   shell: {
-    marginTop: Spacing.sm,
-    marginBottom: Spacing.lg,
-    paddingBottom: Spacing.lg,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: Colors.border,
+    marginTop: Spacing.xs,
+    marginBottom: Spacing.md,
+    paddingBottom: Spacing.xs,
   },
   headerRow: {
     flexDirection: 'row',
@@ -81,7 +82,7 @@ const styles = StyleSheet.create({
   textWrap: {
     flex: 1,
     minWidth: 0,
-    gap: Spacing.xs,
+    gap: 4,
   },
   right: {
     paddingTop: Spacing.xs,
@@ -95,18 +96,37 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     lineHeight: 22,
   },
+  dashboardHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  dashboardTextWrap: {
+    flex: 1,
+    minWidth: 0,
+    paddingRight: 6,
+    gap: 3,
+  },
+  dashboardRight: {
+    flexShrink: 0,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+  },
   greetingText: {
-    ...Typography.h2,
+    ...Typography.h1,
+    fontSize: 22,
+    lineHeight: 28,
     color: Colors.text,
   },
   nameHighlight: {
     fontWeight: '700',
     color: Colors.primary,
   },
-  meta: {
-    ...Typography.captionBold,
+  dateText: {
+    ...Typography.body,
+    fontSize: 13.5,
     color: Colors.textSecondary,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    lineHeight: 18,
   },
 });
