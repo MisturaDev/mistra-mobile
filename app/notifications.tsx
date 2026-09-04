@@ -1,124 +1,207 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors, Spacing, Typography } from '@/constants/theme';
-import { Card } from '@/components/Card';
-import { SettingToggle } from '@/components/SettingToggle';
+import { Ionicons } from '@expo/vector-icons';
+import { Colors, Spacing, Radius, Typography } from '@/constants/theme';
 import { BackButton } from '@/components/BackButton';
-import { useNotificationStore } from '@/store/useNotificationStore';
-import { isExpoGo } from '@/utils/notifications';
+import { NotificationItemCard } from '@/components/NotificationItemCard';
+import { NotificationSettingsModal } from '@/components/NotificationSettingsModal';
+import { useNotificationsFeedStore } from '@/store/useNotificationsFeedStore';
+import { useAuth } from '@/providers/AuthProvider';
+import { useTasks } from '@/hooks/useTasks';
+import { useHabits } from '@/hooks/useHabits';
+import { useEvents } from '@/hooks/useEvents';
+import { NotificationFilter } from '@/types/notifications';
+import { haptics } from '@/utils/haptics';
 
 export default function NotificationsScreen() {
   const router = useRouter();
+  const { session } = useAuth();
+  const userId = session?.user.id;
+
+  const [settingsVisible, setSettingsVisible] = useState(false);
+
+  const { tasks } = useTasks(userId);
+  const { habits } = useHabits(userId);
+  const { events } = useEvents(userId);
+
   const {
-    pushEnabled,
-    dailyReminder,
-    taskReminders,
-    habitReminders,
-    emailUpdates,
+    notifications,
+    filter,
     isHydrated,
+    unreadCount,
     hydrate,
-    setPushEnabled,
-    updatePreference,
-  } = useNotificationStore();
+    setFilter,
+    markAsRead,
+    markAllAsRead,
+    dismissNotification,
+    clearAll,
+    syncFromDashboard,
+  } = useNotificationsFeedStore();
 
   useEffect(() => {
     hydrate();
   }, [hydrate]);
 
-  const handlePushToggle = async (enabled: boolean) => {
-    if (enabled && isExpoGo) {
-      Alert.alert(
-        'Not available in Expo Go',
-        'Push notifications require a development or production build. You can still save your notification preferences here.'
-      );
-      return;
+  useEffect(() => {
+    if (isHydrated) {
+      syncFromDashboard({ tasks, habits, events });
     }
+  }, [isHydrated, tasks, habits, events, syncFromDashboard]);
 
-    const success = await setPushEnabled(enabled);
-    if (!success) {
-      Alert.alert(
-        'Permission required',
-        'Enable notifications in your device settings to receive Mistra reminders.'
-      );
+  const filteredNotifications = useMemo(() => {
+    switch (filter) {
+      case 'unread':
+        return notifications.filter((n) => !n.read);
+      case 'reminders':
+        return notifications.filter(
+          (n) => n.type === 'task_due' || n.type === 'task_overdue' || n.type === 'habit_reminder'
+        );
+      case 'all':
+      default:
+        return notifications;
+    }
+  }, [notifications, filter]);
+
+  const handleFilterPress = (nextFilter: NotificationFilter) => {
+    haptics.selection();
+    setFilter(nextFilter);
+  };
+
+  const handleNotificationPress = async (actionRoute?: string, id?: string) => {
+    if (id) {
+      await markAsRead(id);
+    }
+    if (actionRoute) {
+      router.push(actionRoute as any);
     }
   };
 
-  if (!isHydrated) {
-    return <SafeAreaView style={styles.container} />;
-  }
+  const handleMarkAllRead = async () => {
+    haptics.lightImpact();
+    await markAllAsRead();
+  };
+
+  const handleClearAll = async () => {
+    haptics.notificationWarning();
+    await clearAll();
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        <BackButton onPress={() => router.back()} style={styles.backButton} />
+      {/* Header */}
+      <View style={styles.header}>
+        <BackButton onPress={() => router.back()} />
+        <Text style={styles.headerTitle}>Notifications</Text>
+        <TouchableOpacity
+          onPress={() => {
+            haptics.lightImpact();
+            setSettingsVisible(true);
+          }}
+          style={styles.settingsButton}
+          activeOpacity={0.7}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          accessibilityLabel="Notification Settings"
+        >
+          <Ionicons name="options-outline" size={20} color={Colors.text} />
+        </TouchableOpacity>
+      </View>
 
-        <Text style={styles.title}>Notifications</Text>
-        <Text style={styles.subtitle}>
-          Choose what Mistra can notify you about. Push reminders require device permission.
-        </Text>
+      {/* Filter Tabs */}
+      <View style={styles.filterRow}>
+        <TouchableOpacity
+          onPress={() => handleFilterPress('all')}
+          style={[styles.filterChip, filter === 'all' && styles.filterChipActive]}
+          activeOpacity={0.7}
+        >
+          <Text style={[styles.filterText, filter === 'all' && styles.filterTextActive]}>
+            All ({notifications.length})
+          </Text>
+        </TouchableOpacity>
 
-        {isExpoGo ? (
-          <View style={styles.expoGoBanner}>
-            <Text style={styles.expoGoBannerText}>
-              Push notifications are not supported in Expo Go. Build the app to test reminders on
-              device.
+        <TouchableOpacity
+          onPress={() => handleFilterPress('unread')}
+          style={[styles.filterChip, filter === 'unread' && styles.filterChipActive]}
+          activeOpacity={0.7}
+        >
+          <Text style={[styles.filterText, filter === 'unread' && styles.filterTextActive]}>
+            Unread {unreadCount > 0 ? `(${unreadCount})` : ''}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => handleFilterPress('reminders')}
+          style={[styles.filterChip, filter === 'reminders' && styles.filterChipActive]}
+          activeOpacity={0.7}
+        >
+          <Text style={[styles.filterText, filter === 'reminders' && styles.filterTextActive]}>
+            Reminders
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Sub-actions row */}
+      {notifications.length > 0 && (
+        <View style={styles.actionsRow}>
+          <Text style={styles.resultsCount}>
+            {filteredNotifications.length} notification{filteredNotifications.length === 1 ? '' : 's'}
+          </Text>
+          <View style={styles.actionButtonsGroup}>
+            {unreadCount > 0 && (
+              <TouchableOpacity onPress={handleMarkAllRead} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                <Text style={styles.actionButtonText}>Mark all read</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity onPress={handleClearAll} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <Text style={styles.clearAllText}>Clear all</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
+      {/* List / Feed */}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {filteredNotifications.length > 0 ? (
+          filteredNotifications.map((notif) => (
+            <NotificationItemCard
+              key={notif.id}
+              notification={notif}
+              onPress={() => handleNotificationPress(notif.actionRoute, notif.id)}
+              onDismiss={() => dismissNotification(notif.id)}
+            />
+          ))
+        ) : (
+          <View style={styles.emptyContainer}>
+            <View style={styles.emptyIconWrap}>
+              <Ionicons name="notifications-off-outline" size={32} color={Colors.primary} />
+            </View>
+            <Text style={styles.emptyTitle}>You're all caught up!</Text>
+            <Text style={styles.emptySubtitle}>
+              {filter === 'unread'
+                ? 'No unread notifications at the moment.'
+                : filter === 'reminders'
+                  ? 'No pending task or habit reminders right now.'
+                  : 'You have no new notifications or alerts.'}
             </Text>
           </View>
-        ) : null}
-
-        <Text style={styles.sectionLabel}>Push notifications</Text>
-        <Card style={styles.card} padded elevation="none">
-          <SettingToggle
-            label="Enable notifications"
-            description="Allow Mistra to send reminders on this device"
-            value={pushEnabled}
-            onValueChange={handlePushToggle}
-          />
-        </Card>
-
-        <Text style={styles.sectionLabel}>Reminders</Text>
-        <Card style={styles.card} padded elevation="none">
-          <SettingToggle
-            label="Daily briefing"
-            description="Morning summary of tasks and habits"
-            value={dailyReminder}
-            onValueChange={(value) => updatePreference('dailyReminder', value)}
-            disabled={!pushEnabled}
-          />
-          <View style={styles.divider} />
-          <SettingToggle
-            label="Task reminders"
-            description="Due dates and overdue tasks"
-            value={taskReminders}
-            onValueChange={(value) => updatePreference('taskReminders', value)}
-            disabled={!pushEnabled}
-          />
-          <View style={styles.divider} />
-          <SettingToggle
-            label="Habit reminders"
-            description="Daily habit check-ins and streaks"
-            value={habitReminders}
-            onValueChange={(value) => updatePreference('habitReminders', value)}
-            disabled={!pushEnabled}
-          />
-        </Card>
-
-        <Text style={styles.sectionLabel}>Email</Text>
-        <Card style={styles.card} padded elevation="none">
-          <SettingToggle
-            label="Product updates"
-            description="Occasional emails about new Mistra features"
-            value={emailUpdates}
-            onValueChange={(value) => updatePreference('emailUpdates', value)}
-          />
-        </Card>
-
-        <Text style={styles.note}>
-          Scheduled reminders will fully activate once tasks and habits sync to your account.
-        </Text>
+        )}
       </ScrollView>
+
+      {/* Settings Modal */}
+      <NotificationSettingsModal
+        visible={settingsVisible}
+        onClose={() => setSettingsVisible(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -126,56 +209,110 @@ export default function NotificationsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: Colors.surface,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.xl,
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.md,
+  },
+  headerTitle: {
+    ...Typography.h2,
+    color: Colors.text,
+  },
+  settingsButton: {
+    width: 40,
+    height: 40,
+    borderRadius: Radius.full,
     backgroundColor: Colors.white,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  filterRow: {
+    flexDirection: 'row',
+    paddingHorizontal: Spacing.xl,
+    gap: Spacing.xs,
+    marginBottom: Spacing.sm,
+  },
+  filterChip: {
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 7,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.white,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  filterChipActive: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  filterText: {
+    ...Typography.captionBold,
+    color: Colors.textSecondary,
+  },
+  filterTextActive: {
+    color: Colors.white,
+  },
+  actionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.xs,
+    marginBottom: Spacing.xs,
+  },
+  resultsCount: {
+    ...Typography.caption,
+    color: Colors.textLight,
+  },
+  actionButtonsGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+  },
+  actionButtonText: {
+    ...Typography.captionBold,
+    color: Colors.primary,
+  },
+  clearAllText: {
+    ...Typography.captionBold,
+    color: Colors.textSecondary,
   },
   scrollContent: {
     paddingHorizontal: Spacing.xl,
+    paddingTop: Spacing.xs,
     paddingBottom: Spacing.xxl,
   },
-  backButton: {
-    marginTop: Spacing.sm,
-    marginBottom: Spacing.lg,
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: Spacing.xxl * 1.5,
+    paddingHorizontal: Spacing.lg,
   },
-  title: {
-    ...Typography.h1,
+  emptyIconWrap: {
+    width: 64,
+    height: 64,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.md,
+  },
+  emptyTitle: {
+    ...Typography.title,
     color: Colors.text,
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.xs,
   },
-  subtitle: {
+  emptySubtitle: {
     ...Typography.body,
     color: Colors.textSecondary,
-    lineHeight: 22,
-    marginBottom: Spacing.xl,
-  },
-  sectionLabel: {
-    ...Typography.captionBold,
-    color: Colors.textSecondary,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    marginBottom: Spacing.sm,
-  },
-  card: {
-    marginBottom: Spacing.lg,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: Colors.borderLight,
-  },
-  note: {
-    ...Typography.caption,
-    color: Colors.textLight,
-    lineHeight: 18,
     textAlign: 'center',
-  },
-  expoGoBanner: {
-    backgroundColor: Colors.primaryLight,
-    borderRadius: 12,
-    padding: Spacing.md,
-    marginBottom: Spacing.lg,
-  },
-  expoGoBannerText: {
-    ...Typography.caption,
-    color: Colors.primaryDark,
-    lineHeight: 18,
+    lineHeight: 20,
+    maxWidth: 280,
   },
 });
