@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Card } from '@/components/Card';
 import { Colors, Spacing, Radius, Typography } from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
-import type { CalendarEvent, Task, EventCategory } from '@/types/dashboard';
+import type { CalendarEvent, Task } from '@/types/dashboard';
 
 interface AgendaEventItemProps {
   event: CalendarEvent;
@@ -16,25 +16,10 @@ interface AgendaTaskItemProps {
   onToggle: (id: string) => void;
 }
 
-const EVENT_CATEGORY_ICONS: Record<EventCategory, keyof typeof Ionicons.glyphMap> = {
-  meeting: 'people-outline',
-  work: 'briefcase-outline',
-  personal: 'home-outline',
-  health: 'fitness-outline',
-  study: 'book-outline',
-  general: 'pricetag-outline',
-};
-
 export function AgendaEventCard({ event, onEdit, onDelete }: AgendaEventItemProps) {
-  const icon = EVENT_CATEGORY_ICONS[event.category] || 'calendar-outline';
-
   return (
     <Card style={styles.card} padded elevation="none">
       <View style={styles.eventRow}>
-        <View style={styles.iconContainer}>
-          <Ionicons name={icon} size={18} color={Colors.primary} />
-        </View>
-
         <TouchableOpacity
           activeOpacity={0.7}
           onPress={() => onEdit(event)}
@@ -62,10 +47,6 @@ export function AgendaEventCard({ event, onEdit, onDelete }: AgendaEventItemProp
                   ? event.startTime
                   : 'Scheduled'}
               </Text>
-            </View>
-
-            <View style={styles.categoryBadge}>
-              <Text style={styles.categoryBadgeText}>{event.category}</Text>
             </View>
           </View>
         </TouchableOpacity>
@@ -155,15 +136,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
   },
-  iconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: Radius.md,
-    backgroundColor: Colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: Spacing.md,
-  },
   infoContainer: {
     flex: 1,
     minWidth: 0,
@@ -200,21 +172,6 @@ const styles = StyleSheet.create({
     ...Typography.captionBold,
     color: Colors.primaryDark,
     fontSize: 11,
-  },
-  categoryBadge: {
-    backgroundColor: Colors.white,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: Radius.full,
-  },
-  categoryBadgeText: {
-    ...Typography.caption,
-    color: Colors.textSecondary,
-    fontSize: 10,
-    textTransform: 'capitalize',
-    fontWeight: '600',
   },
   deleteButton: {
     padding: Spacing.xs,

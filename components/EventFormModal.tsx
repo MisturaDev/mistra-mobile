@@ -42,15 +42,6 @@ interface EventFormModalProps {
   onSubmit: (data: EventFormData) => void;
 }
 
-const CATEGORIES: { key: EventCategory; label: string; icon: keyof typeof Ionicons.glyphMap; color: string; bg: string }[] = [
-  { key: 'meeting', label: 'Meeting', icon: 'people-outline', color: '#1D4ED8', bg: '#EFF6FF' },
-  { key: 'work', label: 'Work', icon: 'briefcase-outline', color: '#7C3AED', bg: '#F5F3FF' },
-  { key: 'personal', label: 'Personal', icon: 'home-outline', color: '#D97706', bg: '#FEF3C7' },
-  { key: 'health', label: 'Health', icon: 'fitness-outline', color: '#059669', bg: '#D1FAE5' },
-  { key: 'study', label: 'Study', icon: 'book-outline', color: '#DC2626', bg: '#FEE2E2' },
-  { key: 'general', label: 'General', icon: 'pricetag-outline', color: '#4B5563', bg: '#F3F4F6' },
-];
-
 const TIME_PRESETS = ['09:00 AM', '10:00 AM', '11:30 AM', '02:00 PM', '04:00 PM', '06:00 PM'];
 
 export function EventFormModal({
@@ -74,8 +65,6 @@ export function EventFormModal({
   const [eventDate, setEventDate] = useState(initialEventDate || defaultDate || new Date().toISOString().split('T')[0]);
   const [startTime, setStartTime] = useState<string | null>(initialStartTime);
   const [endTime, setEndTime] = useState<string | null>(initialEndTime);
-  const [category, setCategory] = useState<EventCategory>(initialCategory);
-  const [color, setColor] = useState(initialColor);
   const [isAllDay, setIsAllDay] = useState(initialIsAllDay);
   const [error, setError] = useState('');
 
@@ -86,8 +75,6 @@ export function EventFormModal({
       setEventDate(initialEventDate || defaultDate || new Date().toISOString().split('T')[0]);
       setStartTime(initialStartTime);
       setEndTime(initialEndTime);
-      setCategory(initialCategory);
-      setColor(initialColor);
       setIsAllDay(initialIsAllDay);
       setError('');
     }
@@ -99,8 +86,6 @@ export function EventFormModal({
     initialEventDate,
     initialStartTime,
     initialEndTime,
-    initialCategory,
-    initialColor,
     initialIsAllDay,
   ]);
 
@@ -117,8 +102,8 @@ export function EventFormModal({
       eventDate,
       startTime: isAllDay ? null : startTime,
       endTime: isAllDay ? null : endTime,
-      category,
-      color,
+      category: initialCategory || 'general',
+      color: initialColor || '#7C3AED',
       isAllDay,
     });
   };
@@ -146,44 +131,6 @@ export function EventFormModal({
         autoFocus={mode === 'create'}
         disabled={loading}
       />
-
-      {/* Category Selector */}
-      <View style={styles.section}>
-        <Text style={styles.sectionLabel}>Category</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
-          {CATEGORIES.map((cat) => {
-            const isSelected = category === cat.key;
-            return (
-              <TouchableOpacity
-                key={cat.key}
-                onPress={() => {
-                  setCategory(cat.key);
-                  setColor(cat.color);
-                }}
-                style={[
-                  styles.categoryChip,
-                  isSelected && { backgroundColor: cat.bg, borderColor: cat.color },
-                ]}
-                activeOpacity={0.7}
-              >
-                <Ionicons
-                  name={cat.icon}
-                  size={14}
-                  color={isSelected ? cat.color : Colors.textSecondary}
-                />
-                <Text
-                  style={[
-                    styles.categoryText,
-                    isSelected && { color: cat.color, fontWeight: '700' },
-                  ]}
-                >
-                  {cat.label}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-      </View>
 
       {/* All Day Toggle */}
       <View style={styles.allDayRow}>
@@ -274,22 +221,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: Spacing.xs,
     paddingVertical: Spacing.xs,
-  },
-  categoryChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-    borderRadius: Radius.full,
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  categoryText: {
-    ...Typography.caption,
-    fontWeight: '600',
-    color: Colors.textSecondary,
   },
   allDayRow: {
     flexDirection: 'row',
