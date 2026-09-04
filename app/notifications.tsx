@@ -156,7 +156,7 @@ export default function NotificationsScreen() {
           <View style={styles.actionButtonsGroup}>
             {unreadCount > 0 && (
               <TouchableOpacity onPress={handleMarkAllRead} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                <Text style={styles.actionButtonText}>Mark all read</Text>
+                <Text style={styles.actionButtonText}>Mark all as read</Text>
               </TouchableOpacity>
             )}
             <TouchableOpacity onPress={handleClearAll} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
