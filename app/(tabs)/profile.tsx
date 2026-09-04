@@ -8,6 +8,7 @@ import { ConfirmModal } from '@/components/ConfirmModal';
 import { ChangePasswordModal } from '@/components/ChangePasswordModal';
 import { EditProfileModal } from '@/components/EditProfileModal';
 import { PrivacyPolicyModal } from '@/components/PrivacyPolicyModal';
+import { NotificationSettingsModal } from '@/components/NotificationSettingsModal';
 import { Avatar } from '@/components/Avatar';
 import { Card } from '@/components/Card';
 import { useAuth } from '@/providers/AuthProvider';
@@ -31,6 +32,7 @@ export default function ProfileScreen() {
   const [changePasswordVisible, setChangePasswordVisible] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
   const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
+  const [notificationSettingsVisible, setNotificationSettingsVisible] = useState(false);
   const [confirmModal, setConfirmModal] = useState<'signOut' | 'deleteAccount' | null>(null);
   const { pushEnabled, hydrate, isHydrated } = useNotificationStore();
   const { avatarUri, pickAvatar, removeAvatar } = useProfileAvatar(session?.user.id);
@@ -222,7 +224,10 @@ export default function ProfileScreen() {
             icon="notifications-outline"
             label="Notifications"
             value={isHydrated ? (pushEnabled ? 'On' : 'Off') : 'Reminders and daily alerts'}
-            onPress={() => router.push('/notifications')}
+            onPress={() => {
+              haptics.selection();
+              setNotificationSettingsVisible(true);
+            }}
           />
           <View style={styles.divider} />
           <ProfileMenuRow
@@ -314,6 +319,11 @@ export default function ProfileScreen() {
       <PrivacyPolicyModal
         visible={privacyModalVisible}
         onClose={() => setPrivacyModalVisible(false)}
+      />
+
+      <NotificationSettingsModal
+        visible={notificationSettingsVisible}
+        onClose={() => setNotificationSettingsVisible(false)}
       />
     </SafeAreaView>
   );
