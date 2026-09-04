@@ -1,17 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Modal,
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-} from 'react-native';
-import { Colors, Spacing, Radius, Typography } from '@/constants/theme';
+import { View, StyleSheet } from 'react-native';
+import { Spacing } from '@/constants/theme';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
+import { BottomSheetWrapper } from '@/components/BottomSheetWrapper';
 import { changePasswordSchema, PASSWORD_HINT } from '@/utils/validation';
 
 interface ChangePasswordModalProps {
@@ -74,102 +66,78 @@ export function ChangePasswordModal({
   };
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable style={styles.overlay} onPress={loading ? undefined : onClose}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          style={styles.keyboardView}
-        >
-          <Pressable style={styles.card} onPress={(event) => event.stopPropagation()}>
-            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-              <Text style={styles.title}>Change password</Text>
-              <Input
-                label="Current password"
-                placeholder="Enter current password"
-                value={currentPassword}
-                onChangeText={(value) => {
-                  setCurrentPassword(value);
-                  clearError('currentPassword');
-                }}
-                error={errors.currentPassword}
-                secureTextEntry
-                iconName="lock-closed-outline"
-                disabled={loading}
-              />
-              <Input
-                label="New password"
-                placeholder="Create a new password"
-                hint={PASSWORD_HINT}
-                value={password}
-                onChangeText={(value) => {
-                  setPassword(value);
-                  clearError('password');
-                }}
-                error={errors.password}
-                secureTextEntry
-                iconName="lock-closed-outline"
-                disabled={loading}
-              />
-              <Input
-                label="Confirm new password"
-                placeholder="Confirm new password"
-                value={confirmPassword}
-                onChangeText={(value) => {
-                  setConfirmPassword(value);
-                  clearError('confirmPassword');
-                }}
-                error={errors.confirmPassword}
-                secureTextEntry
-                iconName="lock-closed-outline"
-                disabled={loading}
-              />
-              <View style={styles.actions}>
-                <Button
-                  title="Cancel"
-                  variant="outline"
-                  size="md"
-                  onPress={onClose}
-                  disabled={loading}
-                  style={styles.actionButton}
-                />
-                <Button
-                  title="Update password"
-                  variant="primary"
-                  size="md"
-                  loading={loading}
-                  onPress={handleSubmit}
-                  style={styles.actionButton}
-                />
-              </View>
-            </ScrollView>
-          </Pressable>
-        </KeyboardAvoidingView>
-      </Pressable>
-    </Modal>
+    <BottomSheetWrapper
+      visible={visible}
+      onClose={onClose}
+      title="Change Password"
+      subtitle="Ensure your new password meets the security requirements"
+      loading={loading}
+      scrollable
+      maxHeight="92%"
+    >
+      <Input
+        label="Current password"
+        placeholder="Enter current password"
+        value={currentPassword}
+        onChangeText={(value) => {
+          setCurrentPassword(value);
+          clearError('currentPassword');
+        }}
+        error={errors.currentPassword}
+        secureTextEntry
+        iconName="lock-closed-outline"
+        disabled={loading}
+      />
+      <Input
+        label="New password"
+        placeholder="Create a new password"
+        hint={PASSWORD_HINT}
+        value={password}
+        onChangeText={(value) => {
+          setPassword(value);
+          clearError('password');
+        }}
+        error={errors.password}
+        secureTextEntry
+        iconName="lock-closed-outline"
+        disabled={loading}
+      />
+      <Input
+        label="Confirm new password"
+        placeholder="Confirm new password"
+        value={confirmPassword}
+        onChangeText={(value) => {
+          setConfirmPassword(value);
+          clearError('confirmPassword');
+        }}
+        error={errors.confirmPassword}
+        secureTextEntry
+        iconName="lock-closed-outline"
+        disabled={loading}
+      />
+      <View style={styles.actions}>
+        <Button
+          title="Cancel"
+          variant="outline"
+          size="md"
+          onPress={onClose}
+          disabled={loading}
+          style={styles.actionButton}
+        />
+        <Button
+          title="Update Password"
+          variant="primary"
+          size="md"
+          loading={loading}
+          onPress={handleSubmit}
+          style={styles.actionButton}
+        />
+      </View>
+    </BottomSheetWrapper>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(17, 24, 39, 0.45)',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.xl,
-  },
-  keyboardView: {
-    width: '100%',
-    maxHeight: '90%',
-  },
-  card: {
-    backgroundColor: Colors.white,
-    borderRadius: Radius.lg,
-    padding: Spacing.xl,
-  },
-  title: {
-    ...Typography.h2,
-    color: Colors.text,
-    marginBottom: Spacing.lg,
-  },
   actions: {
     flexDirection: 'row',
     gap: Spacing.sm,
