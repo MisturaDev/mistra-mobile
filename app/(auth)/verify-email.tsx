@@ -8,6 +8,7 @@ import { Logo } from '@/components/Logo';
 import { OtpInput, OTP_CODE_LENGTH } from '@/components/OtpInput';
 import { BackButton } from '@/components/BackButton';
 import { toast } from '@/components/AppToast';
+import { haptics } from '@/utils/haptics';
 import { supabase } from '@/lib/supabase';
 
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -59,6 +60,12 @@ export default function VerifyEmailScreen() {
       setError(verifyError.message);
       return;
     }
+
+    haptics.notificationSuccess();
+    toast.success({
+      title: 'Email verified!',
+      message: 'Welcome to Mistra.',
+    });
   };
 
   const handleResend = async () => {

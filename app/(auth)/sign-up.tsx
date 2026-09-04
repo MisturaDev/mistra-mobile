@@ -9,6 +9,8 @@ import { signupSchema, SignupInput, PASSWORD_HINT } from '@/utils/validation';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
 import { AuthHeader } from '@/components/AuthHeader';
+import { toast } from '@/components/AppToast';
+import { haptics } from '@/utils/haptics';
 import { supabase } from '@/lib/supabase';
 
 export default function SignUpScreen() {
@@ -48,8 +50,19 @@ export default function SignUpScreen() {
     }
 
     if (authData.session) {
+      haptics.notificationSuccess();
+      toast.success({
+        title: 'Account created!',
+        message: 'Welcome to Mistra.',
+      });
       return;
     }
+
+    haptics.lightImpact();
+    toast.info({
+      title: 'Verification code sent',
+      message: `We sent a code to ${data.email}`,
+    });
 
     router.push({
       pathname: '/(auth)/verify-email',

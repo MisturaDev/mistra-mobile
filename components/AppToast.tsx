@@ -83,4 +83,7 @@ export const toast = {
   info({ title = 'Mistra', message }: ToastOptions) {
     Toast.show({ type: 'info', text1: title, text2: message });
   },
+  error({ title = 'Error', message }: ToastOptions) {
+    Toast.show({ type: 'error', text1: title, text2: message });
+  },
 };

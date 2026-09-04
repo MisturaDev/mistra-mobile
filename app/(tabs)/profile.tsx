@@ -20,6 +20,7 @@ import { updateProfileName } from '@/lib/profileStorage';
 import { changePassword } from '@/lib/authStorage';
 import { toast } from '@/components/AppToast';
 import { getUserNameFromSession } from '@/utils/userName';
+import { haptics } from '@/utils/haptics';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -77,6 +78,7 @@ export default function ProfileScreen() {
   };
 
   const handleSignOutPress = () => {
+    haptics.notificationWarning();
     setConfirmModal('signOut');
   };
 
@@ -85,6 +87,10 @@ export default function ProfileScreen() {
     try {
       await signOut();
       setConfirmModal(null);
+      toast.info({
+        title: 'Signed out successfully',
+        message: 'You have been safely signed out.',
+      });
       router.replace('/(auth)/welcome');
     } catch (error) {
       setConfirmModal(null);
@@ -98,6 +104,7 @@ export default function ProfileScreen() {
   };
 
   const handleDeleteAccountPress = () => {
+    haptics.notificationWarning();
     setConfirmModal('deleteAccount');
   };
 
@@ -117,6 +124,7 @@ export default function ProfileScreen() {
     try {
       await updateProfileName(session.user.id, name);
       setEditProfileVisible(false);
+      haptics.notificationSuccess();
       toast.success({ message: 'Profile updated' });
     } catch (error) {
       Alert.alert(
@@ -133,6 +141,7 @@ export default function ProfileScreen() {
     try {
       await changePassword(currentPassword, newPassword);
       setChangePasswordVisible(false);
+      haptics.notificationSuccess();
       toast.success({ message: 'Password updated' });
     } catch (error) {
       Alert.alert(

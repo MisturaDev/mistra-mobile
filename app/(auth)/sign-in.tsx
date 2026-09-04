@@ -9,6 +9,8 @@ import { loginSchema, LoginInput } from '@/utils/validation';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
 import { AuthHeader } from '@/components/AuthHeader';
+import { toast } from '@/components/AppToast';
+import { haptics } from '@/utils/haptics';
 import { supabase } from '@/lib/supabase';
 
 export default function SignInScreen() {
@@ -62,6 +64,12 @@ export default function SignInScreen() {
       Alert.alert('Sign in failed', error.message);
       return;
     }
+
+    haptics.notificationSuccess();
+    toast.success({
+      title: 'Signed in successfully',
+      message: 'Welcome back to Mistra.',
+    });
   };
 
   return (
