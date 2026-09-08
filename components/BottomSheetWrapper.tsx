@@ -42,8 +42,8 @@ export function BottomSheetWrapper({
   showCloseButton = true,
   showHandle = true,
   loading = false,
-  scrollable = false,
-  maxHeight = '90%',
+  scrollable = true,
+  maxHeight = '92%',
   contentContainerStyle,
   containerStyle,
   children,
@@ -74,7 +74,7 @@ export function BottomSheetWrapper({
         />
 
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={[styles.keyboardView, { maxHeight }]}
         >
           <View
@@ -123,6 +123,7 @@ export function BottomSheetWrapper({
                 style={styles.scrollView}
                 showsVerticalScrollIndicator={false}
                 keyboardShouldPersistTaps="handled"
+                keyboardDismissMode="none"
                 nestedScrollEnabled={true}
                 bounces={true}
                 contentContainerStyle={[
@@ -155,6 +156,7 @@ const styles = StyleSheet.create({
   keyboardView: {
     width: '100%',
     justifyContent: 'flex-end',
+    flexShrink: 1,
   },
   sheetContainer: {
     backgroundColor: Colors.white,
