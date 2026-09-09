@@ -117,4 +117,42 @@ export type DayScheduleItem =
   | { type: 'event'; item: CalendarEvent }
   | { type: 'task'; item: Task };
 
+export type GoalCategory =
+  | 'personal'
+  | 'career'
+  | 'health'
+  | 'finance'
+  | 'learning';
 
+export type GoalStatus = 'in_progress' | 'completed';
+
+export interface Goal {
+  id: string;
+  title: string;
+  description?: string;
+  category: GoalCategory;
+  targetDate?: string | null; // YYYY-MM-DD
+  currentValue: number;
+  targetValue: number;
+  unit: string;
+  status: GoalStatus;
+  color: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface GoalRow {
+  id: string;
+  user_id?: string;
+  title: string;
+  description?: string | null;
+  category?: GoalCategory | null;
+  target_date?: string | null;
+  current_value?: number | null;
+  target_value?: number | null;
+  unit?: string | null;
+  status?: GoalStatus | null;
+  color?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
