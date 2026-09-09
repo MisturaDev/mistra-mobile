@@ -11,6 +11,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import { useProfileAvatar } from '@/hooks/useProfileAvatar';
 import { useTasks } from '@/hooks/useTasks';
 import { useHabits } from '@/hooks/useHabits';
+import { useGoals } from '@/hooks/useGoals';
 import { useNotes } from '@/hooks/useNotes';
 import { useEvents } from '@/hooks/useEvents';
 import { getFirstName, getUserNameFromSession } from '@/utils/userName';
@@ -111,6 +112,13 @@ export default function HomeDashboardScreen() {
   } = useHabits(userId);
 
   const {
+    goals,
+    isLoading: goalsLoading,
+    isError: goalsError,
+    refetch: refetchGoals,
+  } = useGoals(userId);
+
+  const {
     notes,
     isLoading: notesLoading,
     isError: notesError,
@@ -146,8 +154,8 @@ export default function HomeDashboardScreen() {
     return events.filter((ev) => ev.eventDate === todayString);
   }, [events, todayString]);
 
-  const isLoading = tasksLoading || habitsLoading || notesLoading || eventsLoading;
-  const hasError = tasksError || habitsError || notesError || eventsError;
+  const isLoading = tasksLoading || habitsLoading || goalsLoading || notesLoading || eventsLoading;
+  const hasError = tasksError || habitsError || goalsError || notesError || eventsError;
   const completedTasks = tasks.filter((task) => task.completed).length;
   const completedHabits = habits.filter((habit) => habit.completed).length;
   const totalItems = tasks.length + habits.length;
@@ -157,11 +165,13 @@ export default function HomeDashboardScreen() {
 
   const visibleTasks = useMemo(() => tasks.slice(0, TASK_PREVIEW_LIMIT), [tasks]);
   const visibleHabits = useMemo(() => habits.slice(0, HABIT_PREVIEW_LIMIT), [habits]);
+  const visibleGoals = useMemo(() => goals.filter((g) => g.status === 'in_progress').slice(0, 2), [goals]);
   const visibleNotes = useMemo(() => notes.slice(0, NOTE_PREVIEW_LIMIT), [notes]);
 
   const handleRetry = () => {
     refetchTasks();
     refetchHabits();
+    refetchGoals();
     refetchNotes();
     refetchEvents();
   };
@@ -420,6 +430,62 @@ export default function HomeDashboardScreen() {
               </DashboardSection>
 
               <DashboardSection
+                title="Active goals"
+                actionLabel="See all"
+                onActionPress={() => router.push('/(tabs)/habits')}
+              >
+                <View style={styles.goalsList}>
+                  {visibleGoals.length === 0 ? (
+                    <Card style={styles.listCard} padded elevation="none">
+                      <Text style={styles.emptyText}>No active goals. Tap See all to set a milestone.</Text>
+                    </Card>
+                  ) : (
+                    visibleGoals.map((goal) => {
+                      const pct = Math.min(
+                        100,
+                        Math.max(0, Math.round((goal.currentValue / (goal.targetValue || 1)) * 100))
+                      );
+                      return (
+                        <TouchableOpacity
+                          key={goal.id}
+                          style={styles.goalCardPreview}
+                          activeOpacity={0.7}
+                          onPress={() => router.push('/(tabs)/habits')}
+                        >
+                          <View style={styles.goalPreviewHeader}>
+                            <View style={styles.goalPreviewTitleWrap}>
+                              <Text style={styles.goalPreviewTitle} numberOfLines={1}>
+                                {goal.title}
+                              </Text>
+                              <Text style={styles.goalPreviewMetrics}>
+                                {goal.unit === '$' ? `$${goal.currentValue.toLocaleString()}` : goal.currentValue}{' '}
+                                /{' '}
+                                {goal.unit === '$'
+                                  ? `$${goal.targetValue.toLocaleString()}`
+                                  : `${goal.targetValue} ${goal.unit !== '%' && goal.unit !== '$' ? goal.unit : ''}`}
+                              </Text>
+                            </View>
+                            <Text style={styles.goalPreviewPercent}>{pct}%</Text>
+                          </View>
+                          <View style={styles.goalPreviewTrack}>
+                            <View
+                              style={[
+                                styles.goalPreviewFill,
+                                {
+                                  width: `${pct}%`,
+                                  backgroundColor: goal.color || Colors.primary,
+                                },
+                              ]}
+                            />
+                          </View>
+                        </TouchableOpacity>
+                      );
+                    })
+                  )}
+                </View>
+              </DashboardSection>
+
+              <DashboardSection
                 title="Recent notes"
                 actionLabel="See all"
                 onActionPress={() => router.push('/(tabs)/notes')}
@@ -637,5 +703,50 @@ const styles = StyleSheet.create({
     color: Colors.textLight,
     fontSize: 12,
     flex: 1,
+  },
+  goalsList: {
+    gap: Spacing.sm,
+  },
+  goalCardPreview: {
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.lg,
+    padding: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    gap: Spacing.sm,
+  },
+  goalPreviewHeader: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+  },
+  goalPreviewTitleWrap: {
+    flex: 1,
+    paddingRight: Spacing.sm,
+  },
+  goalPreviewTitle: {
+    ...Typography.bodyBold,
+    fontSize: 15,
+    color: Colors.text,
+  },
+  goalPreviewMetrics: {
+    ...Typography.caption,
+    color: Colors.textSecondary,
+    marginTop: 2,
+  },
+  goalPreviewPercent: {
+    ...Typography.captionBold,
+    fontSize: 14,
+    color: Colors.primary,
+  },
+  goalPreviewTrack: {
+    height: 6,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.borderLight,
+    overflow: 'hidden',
+  },
+  goalPreviewFill: {
+    height: '100%',
+    borderRadius: Radius.full,
   },
 });
