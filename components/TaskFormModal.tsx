@@ -174,7 +174,12 @@ export function TaskFormModal({
       {/* Category Selector (clean text-only pills) */}
       <View style={styles.section}>
         <Text style={styles.sectionLabel}>Category</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          keyboardShouldPersistTaps="always"
+          contentContainerStyle={styles.chipRow}
+        >
           {CATEGORIES.map((cat) => {
             const isSelected = category === cat.key;
             return (

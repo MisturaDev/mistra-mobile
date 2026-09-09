@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Modal,
   View,
@@ -11,6 +11,9 @@ import {
   ViewStyle,
   StyleProp,
   ScrollView,
+  Keyboard,
+  useWindowDimensions,
+  EmitterSubscription,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -49,12 +52,57 @@ export function BottomSheetWrapper({
   children,
 }: BottomSheetWrapperProps) {
   const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const onShow = (e: any) => {
+      if (e?.endCoordinates?.height) {
+        setKeyboardHeight(e.endCoordinates.height);
+      }
+    };
+    const onHide = () => {
+      setKeyboardHeight(0);
+    };
+
+    const showSub: EmitterSubscription = Keyboard.addListener(showEvent, onShow);
+    const hideSub: EmitterSubscription = Keyboard.addListener(hideEvent, onHide);
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   const handleClose = () => {
     if (loading) return;
+    Keyboard.dismiss();
     haptics.lightImpact();
     onClose();
   };
+
+  const parsedMaxHeight = useMemo(() => {
+    if (typeof maxHeight === 'number') {
+      return maxHeight;
+    }
+    if (typeof maxHeight === 'string' && maxHeight.endsWith('%')) {
+      const pct = parseFloat(maxHeight) || 92;
+      return (windowHeight * pct) / 100;
+    }
+    return windowHeight * 0.92;
+  }, [maxHeight, windowHeight]);
+
+  const currentMaxHeight = useMemo(() => {
+    if (keyboardHeight > 0) {
+      // Constrain modal so its top never exceeds the safe area / status bar
+      const safeAvailable = windowHeight - keyboardHeight - insets.top - Spacing.md;
+      return Math.min(parsedMaxHeight, Math.max(safeAvailable, 220));
+    }
+    return parsedMaxHeight;
+  }, [keyboardHeight, windowHeight, insets.top, parsedMaxHeight]);
 
   return (
     <Modal
@@ -74,13 +122,19 @@ export function BottomSheetWrapper({
         />
 
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={[styles.keyboardView, { maxHeight }]}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={[
+            styles.keyboardView,
+            Platform.OS === 'android' && keyboardHeight > 0 && { paddingBottom: keyboardHeight },
+          ]}
         >
           <View
             style={[
               styles.sheetContainer,
-              { paddingBottom: scrollable ? 0 : Math.max(insets.bottom, Spacing.md) },
+              {
+                maxHeight: currentMaxHeight,
+                paddingBottom: scrollable ? 0 : Math.max(insets.bottom, Spacing.md),
+              },
               containerStyle,
             ]}
           >
@@ -122,13 +176,18 @@ export function BottomSheetWrapper({
               <ScrollView
                 style={styles.scrollView}
                 showsVerticalScrollIndicator={false}
-                keyboardShouldPersistTaps="handled"
+                keyboardShouldPersistTaps="always"
                 keyboardDismissMode="none"
                 nestedScrollEnabled={true}
                 bounces={true}
                 contentContainerStyle={[
                   styles.scrollContent,
-                  { paddingBottom: Math.max(insets.bottom, 16) + Spacing.xl },
+                  {
+                    paddingBottom:
+                      keyboardHeight > 0
+                        ? Spacing.xxl * 2
+                        : Math.max(insets.bottom, 16) + Spacing.xl,
+                  },
                   contentContainerStyle,
                 ]}
               >

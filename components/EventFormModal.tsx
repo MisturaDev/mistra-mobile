@@ -167,7 +167,12 @@ export function EventFormModal({
             containerStyle={styles.timeInputContainer}
           />
           <Text style={styles.presetsLabel}>Quick Presets</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyboardShouldPersistTaps="always"
+            contentContainerStyle={styles.chipRow}
+          >
             {TIME_PRESETS.map((t) => {
               const isSelected = startTime === t;
               return (
